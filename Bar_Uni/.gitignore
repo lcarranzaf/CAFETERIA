@@ -1,0 +1,29 @@
+# Entornos virtuales
+venv/
+env/
+
+# Archivos de configuración privados
+.env
+
+# Compilados de Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Archivos de log
+*.log
+
+# Archivos temporales
+*.tmp
+*.swp
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de migración innecesarios (opcional)
+*/migrations/*.pyc
+*/migrations/__pycache__/
+
+# Archivos de VS Code
+.vscode/
