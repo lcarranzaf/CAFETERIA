@@ -13,6 +13,7 @@ class Menu(models.Model):
     precio = models.DecimalField(max_digits=6, decimal_places=2)
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
     disponible = models.BooleanField(default=True)
+    imagen = models.ImageField(upload_to='menus/', null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

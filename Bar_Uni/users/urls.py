@@ -1,9 +1,11 @@
 from django.urls import path
-from .views import RegisterView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import RegisterView, CustomTokenObtainPairView,profile_view   
+from rest_framework_simplejwt.views import TokenRefreshView
+
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),  # 👈 Usa tu vista personalizada
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('profile/', profile_view, name='profile'),
 ]
