@@ -1,5 +1,6 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import api from '../services/api';
 
 export const AuthContext = createContext();
 
@@ -16,10 +17,35 @@ export const AuthProvider = ({ children }) => {
       : null
   );
 
+  // Obtener perfil desde el backend (mezcla con los datos del JWT)
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (authTokens) {
+        try {
+          const res = await api.get('auth/profile/');
+          setUser((prev) => ({ ...prev, ...res.data }));
+        } catch (error) {
+          console.error('❌ Error al cargar perfil:', error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [authTokens]);
+
+  // Login: guarda tokens y perfil
   const loginUser = async (tokenData) => {
     setAuthTokens(tokenData);
-    setUser(jwtDecode(tokenData.access));
+    const decoded = jwtDecode(tokenData.access);
+    setUser(decoded);
     localStorage.setItem('authTokens', JSON.stringify(tokenData));
+
+    try {
+      const res = await api.get('auth/profile/');
+      setUser((prev) => ({ ...prev, ...res.data }));
+    } catch (error) {
+      console.error('❌ Error al cargar perfil al iniciar sesión:', error);
+    }
   };
 
   const logoutUser = () => {

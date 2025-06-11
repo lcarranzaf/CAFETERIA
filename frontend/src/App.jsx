@@ -5,6 +5,7 @@ import Register from './pages/Auth/Register';
 import Home from './pages/Home'; // 👈 Importa Home
 import MenuPage from './pages/MenuPage';
 import PedidoPage from './pages/PedidoPage';
+import ReservaPage from './pages/ReservaPage';
 function App() {
   return (
     <Router>
@@ -17,6 +18,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/pedido" element={<PedidoPage />} />
+        <Route path="/reservas" element={<ReservaPage />} />
         {/* Redirección por defecto si no hay match */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

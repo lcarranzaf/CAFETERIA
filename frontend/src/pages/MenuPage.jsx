@@ -21,7 +21,7 @@ const MenuPage = () => {
       .then((res) => {
         const hoy = new Date().toISOString().split('T')[0];
         const disponiblesHoy = res.data.filter(
-          (item) => item.disponible && item.creado_en.startsWith(hoy)
+          (item) => item.disponible //&& item.creado_en.startsWith(hoy) solo para menu de hoy
         );
         setMenus(disponiblesHoy);
       })

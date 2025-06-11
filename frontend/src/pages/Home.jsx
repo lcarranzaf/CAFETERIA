@@ -57,6 +57,7 @@ const Home = () => {
               descripcion={item.descripcion}
               precio={item.precio}
               imagen={item.imagen || '/placeholder.png'}
+              onAgregar={() => handleAgregar(item)}
             />
           ))}
         </div>

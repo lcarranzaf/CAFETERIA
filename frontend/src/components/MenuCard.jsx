@@ -11,12 +11,10 @@ const MenuCard = ({ nombre, precio, descripcion, imagen, onAgregar }) => {
         onError={(e) => (e.target.src = '/placeholder.png')}
       />
       <div className="text-yellow-500 mb-1">★★★★★</div>
-      <h3 className="font-bold capitalize text-lg">{nombre}</h3>
-      <p className="text-sm text-gray-700 mt-1">{precio}</p> 
+      <h3 className="font-bold capitalize text-lg">{nombre}</h3> 
       <p className="text-sm text-gray-800 mt-1 font-semibold">${Number(precio).toFixed(2)}</p>
       <button
         onClick={onAgregar}
-        
         disabled={!onAgregar}
         className={`mt-2 bg-white rounded-full p-1 px-3 text-xl ${
             onAgregar

@@ -26,52 +26,26 @@ export const OrderProvider = ({ children }) => {
 
   const confirmarPedido = async () => {
     try {
-      const response = await api.post('orders/', {
-        items: pedido.map((item) => ({
-          menu: item.id,
-          cantidad: item.cantidad
-        }))
-      }, {
-        headers: {
-          Authorization: `Bearer ${authTokens.access}`
-        }
-      });
+      const items = pedido.map((item) => ({
+        menu: item.id,
+        cantidad: item.cantidad,
+      }));
 
-      console.log('Pedido confirmado:', response.data);
-      setPedido([]);  // Limpiar carrito
+      const res = await api.post('orders/', { items }); // ✅ sin headers
+      console.log('✅ Pedido confirmado:', res.data);
+      setPedido([]);  // limpia el carrito
+      return res.data; // devuelve el pedido creado (incluye id)
     } catch (error) {
-      console.error('Error al confirmar pedido:', error);
+      console.error('❌ Error al confirmar pedido:', error);
+      throw error;
     }
   };
 
   return (
-    <OrderContext.Provider value={{ pedido, agregarAlPedido, eliminarDelPedido, confirmarPedido }}>
+    <OrderContext.Provider
+      value={{ pedido, agregarAlPedido, eliminarDelPedido, confirmarPedido }}
+    >
       {children}
     </OrderContext.Provider>
   );
-};
-
-const confirmarPedido = async () => {
-  try {
-    // Paso 1: crear la orden vacía
-    const resOrden = await api.post('orders/', {});  // Asegúrate de tener autenticación activa
-    const orderId = resOrden.data.id;
-
-    // Paso 2: por cada item del carrito, crear un OrderItem
-    for (const item of pedido) {
-      await api.post('orders/items/', {
-        order: orderId,
-        menu: item.id,
-        cantidad: item.cantidad,
-      });
-    }
-
-    // Paso 3: limpiar el carrito
-    setPedido([]);
-
-    return orderId;  // devuelve el id de la orden creada
-  } catch (error) {
-    console.error('Error al confirmar pedido:', error);
-    return null;
-  }
 };
