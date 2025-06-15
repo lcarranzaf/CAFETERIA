@@ -1,6 +1,8 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import api from '../services/api';
+import axios from 'axios';
 
 export const AuthContext = createContext();
 
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }) => {
       : null
   );
 
-  // Obtener perfil desde el backend (mezcla con los datos del JWT)
+  // Cargar perfil extendido (rol, is_staff, etc.)
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (authTokens) {
@@ -33,7 +35,42 @@ export const AuthProvider = ({ children }) => {
     fetchUserProfile();
   }, [authTokens]);
 
-  // Login: guarda tokens y perfil
+  // 🕒 Refrescar token periódicamente
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (authTokens) {
+        const decoded = jwtDecode(authTokens.access);
+        const now = Date.now() / 1000;
+
+        // Si faltan menos de 60 segundos para que expire
+        if (decoded.exp - now < 60) {
+          try {
+            const res = await axios.post('http://127.0.0.1:8000/api/auth/token/refresh/', {
+              refresh: authTokens.refresh,
+            });
+
+            const newTokens = {
+              ...authTokens,
+              access: res.data.access,
+            };
+
+            setAuthTokens(newTokens);
+            localStorage.setItem('authTokens', JSON.stringify(newTokens));
+
+            // También actualiza el usuario si quieres
+            const refreshedUser = jwtDecode(res.data.access);
+            setUser((prev) => ({ ...prev, ...refreshedUser }));
+          } catch (error) {
+            console.error('⚠️ Fallo al refrescar token automáticamente');
+            logoutUser();
+          }
+        }
+      }
+    }, 30000); // Cada 30 segundos
+
+    return () => clearInterval(interval);
+  }, [authTokens]);
+
   const loginUser = async (tokenData) => {
     setAuthTokens(tokenData);
     const decoded = jwtDecode(tokenData.access);

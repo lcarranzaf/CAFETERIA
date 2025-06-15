@@ -14,7 +14,7 @@ class Menu(models.Model):
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
     disponible = models.BooleanField(default=True)
     imagen = models.ImageField(upload_to='menus/', null=True, blank=True)
-    creado_en = models.DateTimeField(auto_now_add=True)
-
+    creado_en = models.DateTimeField(auto_now_add=False, auto_now=True)
+    destacado = models.BooleanField(default=False)
     def __str__(self):
         return self.nombre

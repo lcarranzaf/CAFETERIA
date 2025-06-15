@@ -1,7 +1,7 @@
 // src/pages/Auth/Register.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import cafeteriaImage from '../../assets/cafeteria.jpeg';
+import cafeteriaImage from '../../assets/CAFETERIA.WEBP';
 import api from '../../services/api';
 import { FaUser, FaLock, FaAt, FaPhone } from 'react-icons/fa';
 
