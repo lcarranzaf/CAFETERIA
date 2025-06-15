@@ -4,7 +4,7 @@ import MenuCard from '../components/MenuCard';
 import api from '../services/api';
 import { OrderContext } from '../context/OrderContext';
 import { AuthContext } from '../context/AuthContext';
-import Toast from '../components/Toast'; // ✅ NUEVO
+import Toast from '../components/Toast'; // ✅ TOAST
 
 const tipos = ['desayuno', 'almuerzo', 'piqueo', 'bebida'];
 
@@ -20,15 +20,21 @@ const MenuPage = () => {
     api.get('menus/')
       .then((res) => {
         const hoy = new Date().toISOString().split('T')[0];
-        const disponiblesHoy = res.data.filter(
-          (item) => item.disponible //&& item.creado_en.startsWith(hoy) solo para menu de hoy
-        );
-        setMenus(disponiblesHoy);
+
+        let visibles;
+
+        if (user?.rol === 'admin') {
+          visibles = res.data;
+        } else {
+          visibles = res.data.filter((item) => item.disponible);
+        }
+
+        setMenus(visibles);
       })
       .catch((err) => {
         console.error("Error cargando menús:", err);
       });
-  }, []);
+  }, [user]);
 
   const handleAgregar = (item) => {
     if (user) {
@@ -72,6 +78,7 @@ const MenuPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {menusFiltrados.map((item) => (
               <MenuCard
+                id={item.id}
                 key={item.id}
                 nombre={item.nombre}
                 precio={item.precio}

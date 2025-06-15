@@ -20,8 +20,14 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+# Serializer para obtener perfil del usuario autenticado (incluye is_staff)
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'telefono', 'is_staff']
+        read_only_fields = ['username', 'email', 'is_staff']
 
-# 🔐 Serializer personalizado para el login con JWT extendido
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -33,5 +39,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['last_name'] = user.last_name
         token['email'] = user.email
         token['telefono'] = user.telefono
+        token['is_staff'] = user.is_staff
 
         return token
