@@ -1,14 +1,26 @@
 // src/context/OrderContext.jsx
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import api from '../services/api';
 import { AuthContext } from './AuthContext';
 
 export const OrderContext = createContext();
 
 export const OrderProvider = ({ children }) => {
-  const [pedido, setPedido] = useState([]);
-  const { authTokens } = useContext(AuthContext);
+  const [pedido, setPedido] = useState(() => {
+    const almacenado = localStorage.getItem('pedido');
+    return almacenado ? JSON.parse(almacenado) : [];
+  });
+  const { authTokens, user } = useContext(AuthContext);
 
+
+  // ✅ Guardar carrito en localStorage cada vez que cambie y haya sesión
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('pedido', JSON.stringify(pedido));
+    }
+  }, [pedido, user]);
+
+  // ✅ Agregar item al pedido
   const agregarAlPedido = (item) => {
     const index = pedido.findIndex(i => i.id === item.id);
     if (index !== -1) {
@@ -20,21 +32,37 @@ export const OrderProvider = ({ children }) => {
     }
   };
 
+  // ✅ Eliminar item del pedido
   const eliminarDelPedido = (id) => {
-    setPedido(pedido.filter(item => item.id !== id));
+    const actualizado = pedido.filter(item => item.id !== id);
+    setPedido(actualizado);
   };
 
+  // ✅ Actualizar cantidad (y eliminar si queda en 0)
+  const actualizarCantidadPedido = (id, nuevaCantidad) => {
+    if (nuevaCantidad < 1) {
+      eliminarDelPedido(id);
+      return;
+    }
+
+    const actualizado = pedido.map(item =>
+      item.id === id ? { ...item, cantidad: nuevaCantidad } : item
+    );
+    setPedido(actualizado);
+  };
+
+  // ✅ Confirmar pedido y limpiar carrito
   const confirmarPedido = async () => {
     try {
-      const items = pedido.map((item) => ({
+      const items = pedido.map(item => ({
         menu: item.id,
         cantidad: item.cantidad,
       }));
 
-      const res = await api.post('orders/', { items }); // ✅ sin headers
-      console.log('✅ Pedido confirmado:', res.data);
-      setPedido([]);  // limpia el carrito
-      return res.data; // devuelve el pedido creado (incluye id)
+      const res = await api.post('orders/', { items });
+      setPedido([]);
+      localStorage.removeItem('pedido'); // limpiar storage al confirmar
+      return res.data;
     } catch (error) {
       console.error('❌ Error al confirmar pedido:', error);
       throw error;
@@ -43,7 +71,13 @@ export const OrderProvider = ({ children }) => {
 
   return (
     <OrderContext.Provider
-      value={{ pedido, agregarAlPedido, eliminarDelPedido, confirmarPedido }}
+      value={{
+        pedido,
+        agregarAlPedido,
+        eliminarDelPedido,
+        actualizarCantidadPedido,
+        confirmarPedido
+      }}
     >
       {children}
     </OrderContext.Provider>

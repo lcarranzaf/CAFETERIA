@@ -1,16 +1,34 @@
-// src/pages/ReservaPage.jsx
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
 
 const ReservaPage = () => {
   const [ordenes, setOrdenes] = useState([]);
+  const [estadoReserva, setEstadoReserva] = useState(localStorage.getItem('estadoReserva') || '');
+  const [estadoPago, setEstadoPago] = useState(localStorage.getItem('estadoPago') || '');
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(localStorage.getItem('fechaSeleccionada') || '');
+  const [comprobantes, setComprobantes] = useState({});
 
   useEffect(() => {
     api.get('orders/')
       .then((res) => setOrdenes(res.data))
       .catch((err) => console.error('Error al cargar órdenes:', err));
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('estadoReserva', estadoReserva);
+    localStorage.setItem('estadoPago', estadoPago);
+    localStorage.setItem('fechaSeleccionada', fechaSeleccionada);
+  }, [estadoReserva, estadoPago, fechaSeleccionada]);
+
+  const limpiarFiltros = () => {
+    setEstadoReserva('');
+    setEstadoPago('');
+    setFechaSeleccionada('');
+    localStorage.removeItem('estadoReserva');
+    localStorage.removeItem('estadoPago');
+    localStorage.removeItem('fechaSeleccionada');
+  };
 
   const handleMetodoChange = (e, id) => {
     setOrdenes((prev) =>
@@ -20,8 +38,8 @@ const ReservaPage = () => {
     );
   };
 
-  const handleComprobanteUpload = async (e, orden) => {
-    const file = e.target.files[0];
+  const handleComprobanteUpload = async (orden) => {
+    const file = comprobantes[orden.id];
     if (!file || !orden.metodo_pago) return alert('Selecciona método de pago y archivo');
 
     const formData = new FormData();
@@ -29,7 +47,7 @@ const ReservaPage = () => {
     formData.append('comprobante_pago', file);
 
     try {
-      await api.post(`orders/${orden.id}/upload_comprobante/`, formData, {
+      await api.patch(`orders/${orden.id}/upload_comprobante/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('✅ Comprobante subido con éxito');
@@ -44,22 +62,82 @@ const ReservaPage = () => {
     return f.toLocaleString();
   };
 
+  const ordenesFiltradas = ordenes
+    .filter((orden) => {
+      const coincideEstadoReserva = estadoReserva ? orden.estado_reserva === estadoReserva : true;
+      const coincideEstadoPago = estadoPago ? orden.estado_pago === estadoPago : true;
+      const coincideFecha = fechaSeleccionada
+        ? new Date(orden.fecha_orden).toLocaleDateString('en-CA') === fechaSeleccionada
+        : true;
+
+      return coincideEstadoReserva && coincideEstadoPago && coincideFecha;
+    })
+    .sort((a, b) => new Date(b.fecha_orden) - new Date(a.fecha_orden));
+
   return (
     <div className="min-h-screen bg-gray-100 text-black">
       <Navbar />
 
-      <section className="max-w-4xl mx-auto py-8 px-4">
+      <section className="max-w-5xl mx-auto py-8 px-4">
         <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
           <span role="img" aria-label="pedido">🧾</span> Tus Pedidos
         </h2>
 
-        {ordenes.length === 0 ? (
-          <p className="text-center text-gray-500">No tienes pedidos registrados.</p>
-        ) : (
-          ordenes.map((orden) => (
-            <div
-              className="bg-white shadow-md rounded-xl p-4 mb-6"
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium mb-1">Estado de Reserva</label>
+            <select
+              value={estadoReserva}
+              onChange={(e) => setEstadoReserva(e.target.value)}
+              className="w-full border rounded px-3 py-2"
             >
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="aceptado">Aceptado</option>
+              <option value="rechazado">Rechazado</option>
+              <option value="entregado">Entregado</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Estado de Pago</label>
+            <select
+              value={estadoPago}
+              onChange={(e) => setEstadoPago(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            >
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="verificado">Verificado</option>
+              <option value="rechazado">Rechazado</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Fecha exacta</label>
+            <input
+              type="date"
+              value={fechaSeleccionada}
+              onChange={(e) => setFechaSeleccionada(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <div className="flex items-end">
+            <button
+              onClick={limpiarFiltros}
+              className="w-full bg-red-200 text-red-700 px-3 py-2 rounded hover:bg-red-300"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        </div>
+
+        {ordenesFiltradas.length === 0 ? (
+          <p className="text-center text-gray-500">No se encontraron pedidos.</p>
+        ) : (
+          ordenesFiltradas.map((orden) => (
+            <div key={orden.id} className="bg-white shadow-md rounded-xl p-4 mb-6">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-sm text-gray-500">{formatearFecha(orden.fecha_orden)}</p>
               </div>
@@ -93,10 +171,10 @@ const ReservaPage = () => {
 
                   {orden.metodo_pago === 'DEUNA' && (
                     <div className="text-sm text-blue-600">
-                      <p>💳 Link de pago: <a href="https://pagar.deuna.app/H92p/U2FsdGVkX1+tdNs4fsxy0svJbnoWdkBCiEWTItsUGiQ2YONon4Mr2ZZTC8+HhQeoEheflH0csD0AKEf6atC65hAQnvFSaRbjeZvhN3RnsPIjASvHf+HdF7Puzh7eWa0jlGamww/RX7e0X+GLXlZX6WO/Z/jdnuycroo+S6OYhyzz4OwTBYUXTnE27Qw3I8/WEeH6+4pRQC/orj/ifKCFlA==" className="underline">Ir a DEUNA</a></p>
+                      <p>💳 Link de pago: <a href="https://pagar.deuna.app/H92p/..." className="underline">Ir a DEUNA</a></p>
                       <img
                         src="/qrDeuna.jpeg"
-                        alt="QR Peigo"
+                        alt="QR Deuna"
                         className="w-32 h-32 mt-2"
                       />
                     </div>
@@ -105,9 +183,21 @@ const ReservaPage = () => {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleComprobanteUpload(e, orden)}
+                    onChange={(e) => setComprobantes(prev => ({
+                      ...prev,
+                      [orden.id]: e.target.files[0]
+                    }))}
                     className="w-full"
                   />
+
+                  {comprobantes[orden.id] && (
+                    <button
+                      onClick={() => handleComprobanteUpload(orden)}
+                      className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                    >
+                      Subir comprobante
+                    </button>
+                  )}
                 </div>
               )}
 

@@ -30,7 +30,7 @@ const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar }) => {
       <img
         src={imagen || '/plato.png'}
         alt={nombre}
-        className="w-full h-32 object-cover rounded-md mb-2"
+        className="w-full h-40 object-contain bg-white rounded-md mb-2"
         onError={(e) => (e.target.src = '/placeholder.png')}
       />
       <div className="text-yellow-500 mb-1">★★★★★</div>

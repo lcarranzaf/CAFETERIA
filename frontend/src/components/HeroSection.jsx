@@ -51,19 +51,20 @@ const HeroSection = () => {
       </div>
 
       {/* LADO DERECHO */}
-      <div className="relative text-center">
+      <div className="relative text-center md:-ml-6">
         <img
           src={destacado?.imagen || "/plato.png"}
           alt={destacado?.nombre || "plato principal"}
-          className="w-72 md:w-96 rounded-xl mx-auto"
+          className="w-64 md:w-80 rounded-xl mx-auto mt-7"
         />
 
-        {/* Valoración flotante solo en desktop */}
-        <div className="hidden md:block absolute -bottom-4 -right-4 bg-white border-2 border-blue-300 rounded-xl p-3 shadow text-center">
-          <span className="text-yellow-500 text-lg">⭐</span>
-          <p className="text-sm font-medium">4.2</p>
-          <p className="text-xs text-gray-500">Valoraciones</p>
+        {/* Valoración flotante más pequeña */}
+        <div className="hidden md:block absolute -bottom-3 -right-3 bg-white border border-blue-300 rounded-lg p-2 shadow text-center w-20">
+          <span className="text-yellow-500 text-base">⭐</span>
+          <p className="text-xs font-medium">4.2</p>
+          <p className="text-[10px] text-gray-500">Valoraciones</p>
         </div>
+
 
         {/* Contenido debajo en móvil */}
         {destacado && (

@@ -1,4 +1,3 @@
-
 // src/components/MenuCarousel.jsx
 import React, { useRef } from 'react';
 import MenuCard from './MenuCard';
@@ -26,8 +25,7 @@ const MenuCarousel = ({ items }) => {
 
       <div
         ref={scrollRef}
-        <div className="flex overflow-x-auto scrollbar-hide ...">
-
+        className="flex overflow-x-hidden scrollbar-hide gap-6 px-4 py-2 scroll-smooth snap-x snap-mandatory"
       >
         {items.map((item) => (
           <div
@@ -54,4 +52,5 @@ const MenuCarousel = ({ items }) => {
     </div>
   );
 };
+
 export default MenuCarousel;
