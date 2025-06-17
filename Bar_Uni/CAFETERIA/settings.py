@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'menus',
     'reservations',
     'orders',
+    'reports',
+    'reviews',
 ]
 
 

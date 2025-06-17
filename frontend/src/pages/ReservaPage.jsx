@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
-
+import { HiOutlineCalendar } from 'react-icons/hi';
+import ImagenQR from '../components/ImagenQQR'
 const ReservaPage = () => {
   const [ordenes, setOrdenes] = useState([]);
   const [estadoReserva, setEstadoReserva] = useState(localStorage.getItem('estadoReserva') || '');
   const [estadoPago, setEstadoPago] = useState(localStorage.getItem('estadoPago') || '');
   const [fechaSeleccionada, setFechaSeleccionada] = useState(localStorage.getItem('fechaSeleccionada') || '');
   const [comprobantes, setComprobantes] = useState({});
+  const dateRef = useRef(null);
 
   useEffect(() => {
     api.get('orders/')
@@ -89,7 +91,7 @@ const ReservaPage = () => {
             <select
               value={estadoReserva}
               onChange={(e) => setEstadoReserva(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded px-3 py-2 bg-white"
             >
               <option value="">Todos</option>
               <option value="pendiente">Pendiente</option>
@@ -104,7 +106,7 @@ const ReservaPage = () => {
             <select
               value={estadoPago}
               onChange={(e) => setEstadoPago(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded px-3 py-2 bg-white"
             >
               <option value="">Todos</option>
               <option value="pendiente">Pendiente</option>
@@ -114,21 +116,34 @@ const ReservaPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Fecha exacta</label>
-            <input
-              type="date"
-              value={fechaSeleccionada}
-              onChange={(e) => setFechaSeleccionada(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            />
+            <label className="block text-sm font-medium mb-1 text-black">Fecha exacta</label>
+            <div className="relative">
+              <input
+                ref={dateRef}
+                type="date"
+                value={fechaSeleccionada}
+                onChange={(e) => setFechaSeleccionada(e.target.value)}
+                className="w-full border rounded px-3 py-2 bg-white text-black pr-10"
+              />
+              <HiOutlineCalendar
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+                onClick={() => {
+                  if (dateRef.current?.showPicker) {
+                    dateRef.current.showPicker();
+                  } else {
+                    dateRef.current.focus();
+                  }
+                }}
+              />
+            </div>
           </div>
 
           <div className="flex items-end">
             <button
               onClick={limpiarFiltros}
-              className="w-full bg-red-200 text-red-700 px-3 py-2 rounded hover:bg-red-300"
+              className="w-full bg-red-50 text-red-700 px-3 py-2 rounded hover:bg-red-300"
             >
-              Limpiar filtros
+              Eliminar filtros
             </button>
           </div>
         </div>
@@ -137,8 +152,9 @@ const ReservaPage = () => {
           <p className="text-center text-gray-500">No se encontraron pedidos.</p>
         ) : (
           ordenesFiltradas.map((orden) => (
-            <div key={orden.id} className="bg-white shadow-md rounded-xl p-4 mb-6">
-              <div className="flex justify-between items-center mb-2">
+            <div key={orden.id} className="bg-amber-50 shadow-md rounded-xl p-4 mb-6 ">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="...">Fecha:</span>
                 <p className="text-sm text-gray-500">{formatearFecha(orden.fecha_orden)}</p>
               </div>
               <p>Estado reserva: {orden.estado_reserva}</p>
@@ -162,7 +178,7 @@ const ReservaPage = () => {
                     <select
                       value={orden.metodo_pago || ''}
                       onChange={(e) => handleMetodoChange(e, orden.id)}
-                      className="ml-2 px-2 py-1 rounded border"
+                      className="ml-2 px-2 py-1 rounded border bg-amber-100"
                     >
                       <option value="">Selecciona</option>
                       <option value="DEUNA">DEUNA</option>
@@ -172,24 +188,26 @@ const ReservaPage = () => {
                   {orden.metodo_pago === 'DEUNA' && (
                     <div className="text-sm text-blue-600">
                       <p>💳 Link de pago: <a href="https://pagar.deuna.app/H92p/..." className="underline">Ir a DEUNA</a></p>
-                      <img
-                        src="/qrDeuna.jpeg"
-                        alt="QR Deuna"
-                        className="w-32 h-32 mt-2"
-                      />
+                      <ImagenQR />
                     </div>
                   )}
 
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setComprobantes(prev => ({
-                      ...prev,
-                      [orden.id]: e.target.files[0]
-                    }))}
-                    className="w-full"
-                  />
-
+                  <label className="inline-block bg-amber-50 border border-gray-400 text-gray-800 px-4 py-2 rounded cursor-pointer hover:bg-amber-100 transition">
+                    Seleccionar archivo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setComprobantes(prev => ({
+                        ...prev,
+                        [orden.id]: e.target.files[0]
+                      }))}
+                      className="hidden"
+                    />
+                  </label>
+                  <span className="ml-2 text-sm text-gray-600">
+                    {comprobantes[orden.id]?.name || 'Sin archivos seleccionados'}
+                  </span>
+                  <br></br>
                   {comprobantes[orden.id] && (
                     <button
                       onClick={() => handleComprobanteUpload(orden)}

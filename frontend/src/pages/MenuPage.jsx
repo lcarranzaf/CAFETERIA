@@ -4,7 +4,7 @@ import MenuCard from '../components/MenuCard';
 import api from '../services/api';
 import { OrderContext } from '../context/OrderContext';
 import { AuthContext } from '../context/AuthContext';
-import Toast from '../components/Toast'; // ✅ TOAST
+import Toast from '../components/Toast';
 
 const tipos = ['desayuno', 'almuerzo', 'piqueo', 'bebida'];
 
@@ -15,6 +15,7 @@ const MenuPage = () => {
   const [menus, setMenus] = useState([]);
   const [tipoActivo, setTipoActivo] = useState(null);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState(''); // ✅ NUEVO
 
   useEffect(() => {
     api.get('menus/')
@@ -22,7 +23,6 @@ const MenuPage = () => {
         const hoy = new Date().toISOString().split('T')[0];
 
         let visibles;
-
         if (user?.rol === 'admin') {
           visibles = res.data;
         } else {
@@ -39,6 +39,7 @@ const MenuPage = () => {
   const handleAgregar = (item) => {
     if (user) {
       agregarAlPedido(item);
+      setToastMessage(`${item.nombre} agregado al pedido`); 
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 2500);
     } else {
@@ -53,7 +54,7 @@ const MenuPage = () => {
   return (
     <div className="bg-white text-black min-h-screen">
       <Navbar />
-      <Toast message="✅ Agregado al carrito" show={toastVisible} /> {/* ✅ TOAST */}
+      <Toast message={toastMessage} show={toastVisible} type="success" /> 
 
       <section className="py-8 px-4 md:px-20 text-center">
         <h2 className="text-3xl font-bold mb-6">Menú del día</h2>

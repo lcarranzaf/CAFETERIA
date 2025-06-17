@@ -10,8 +10,19 @@ export const OrderProvider = ({ children }) => {
     const almacenado = localStorage.getItem('pedido');
     return almacenado ? JSON.parse(almacenado) : [];
   });
+
   const { authTokens, user } = useContext(AuthContext);
 
+  // ✅ Limpiar carrito cuando el usuario cierre sesión (evento personalizado)
+  useEffect(() => {
+    const handleLogout = () => {
+      setPedido([]);
+      localStorage.removeItem('pedido');
+    };
+
+    window.addEventListener('logout', handleLogout);
+    return () => window.removeEventListener('logout', handleLogout);
+  }, []);
 
   // ✅ Guardar carrito en localStorage cada vez que cambie y haya sesión
   useEffect(() => {
@@ -30,6 +41,11 @@ export const OrderProvider = ({ children }) => {
     } else {
       setPedido([...pedido, { ...item, cantidad: 1 }]);
     }
+  };
+
+  const limpiarPedido = () => {
+    setPedido([]);
+    localStorage.removeItem('pedido');
   };
 
   // ✅ Eliminar item del pedido
@@ -61,7 +77,7 @@ export const OrderProvider = ({ children }) => {
 
       const res = await api.post('orders/', { items });
       setPedido([]);
-      localStorage.removeItem('pedido'); // limpiar storage al confirmar
+      localStorage.removeItem('pedido');
       return res.data;
     } catch (error) {
       console.error('❌ Error al confirmar pedido:', error);
@@ -76,7 +92,8 @@ export const OrderProvider = ({ children }) => {
         agregarAlPedido,
         eliminarDelPedido,
         actualizarCantidadPedido,
-        confirmarPedido
+        confirmarPedido,
+        limpiarPedido
       }}
     >
       {children}

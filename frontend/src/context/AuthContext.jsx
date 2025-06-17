@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
             setAuthTokens(newTokens);
             localStorage.setItem('authTokens', JSON.stringify(newTokens));
 
-            // También actualiza el usuario si quieres
             const refreshedUser = jwtDecode(res.data.access);
             setUser((prev) => ({ ...prev, ...refreshedUser }));
           } catch (error) {
@@ -66,7 +65,7 @@ export const AuthProvider = ({ children }) => {
           }
         }
       }
-    }, 30000); // Cada 30 segundos
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [authTokens]);
@@ -90,6 +89,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem('authTokens');
     localStorage.removeItem('pedido');
+
+    // ✅ Dispara evento de logout
+    const event = new Event('logout');
+    window.dispatchEvent(event);
   };
 
   return (

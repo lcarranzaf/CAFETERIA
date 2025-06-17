@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { OrderContext } from '../context/OrderContext';
 import api from '../services/api'; // <-- Asegúrate de tener esto
+import ImagenQR from '../components/ImagenQQR'
 
 const PedidoPage = () => {
   const { pedido, eliminarDelPedido, confirmarPedido } = useContext(OrderContext);
@@ -125,7 +126,8 @@ const PedidoPage = () => {
                           Ir a DEUNA
                         </a>
                       </p>
-                      <img src="/qrDeuna.jpeg" alt="QR Deuna" className="w-32 h-32 mx-auto mb-4" />
+                      <ImagenQR
+                       className="w-32 h-32 mx-auto mb-4 transition-transform duration-300 ease-in-out hover:scale-125" />
                     </div>
                   )}
 

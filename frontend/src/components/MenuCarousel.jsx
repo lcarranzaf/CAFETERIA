@@ -1,9 +1,13 @@
-// src/components/MenuCarousel.jsx
-import React, { useRef } from 'react';
+import React, { useRef, useContext, useState } from 'react';
 import MenuCard from './MenuCard';
+import { OrderContext } from '../context/OrderContext';
+import Toast from './Toast';
 
 const MenuCarousel = ({ items }) => {
   const scrollRef = useRef(null);
+  const { agregarAlPedido } = useContext(OrderContext);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -12,6 +16,13 @@ const MenuCarousel = ({ items }) => {
         behavior: 'smooth',
       });
     }
+  };
+
+  const handleAgregar = (item) => {
+    agregarAlPedido(item);
+    setToastMessage(` ${item.nombre} agregado al pedido`);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2000);
   };
 
   return (
@@ -37,8 +48,10 @@ const MenuCarousel = ({ items }) => {
               descripcion={item.descripcion}
               precio={item.precio}
               imagen={item.imagen || '/placeholder.png'}
-              onAgregar={() => {}}
+              onAgregar={() => handleAgregar(item)}
+              
             />
+            
           </div>
         ))}
       </div>
@@ -49,6 +62,9 @@ const MenuCarousel = ({ items }) => {
       >
         ▶
       </button>
+
+      {/* Toast de confirmación */}
+      <Toast message={toastMessage} show={toastVisible} type="success" />
     </div>
   );
 };

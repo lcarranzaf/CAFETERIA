@@ -1,8 +1,8 @@
 import React, { useContext, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { OrderContext } from "../context/OrderContext";
 import { Link } from "react-router-dom";
 import { HiOutlineMenu, HiOutlineShoppingCart } from "react-icons/hi";
+import { AuthContext } from "../context/AuthContext";
+import { OrderContext } from "../context/OrderContext";
 import PedidoModal from "./PedidoModal";
 
 const Navbar = () => {
@@ -16,7 +16,7 @@ const Navbar = () => {
   return (
     <>
       <nav className="bg-white shadow-md px-6 py-4 flex items-center justify-between relative">
-        {/* Izquierda: Logo + Navegación */}
+        {/* Izquierda */}
         <div className="flex items-center gap-6">
           <div className="flex items-center space-x-2">
             <img src="/Logo.png" alt="Logo" className="h-10" />
@@ -28,10 +28,17 @@ const Navbar = () => {
             <li><Link to="/menu">Menú</Link></li>
             {user && <li><Link to="/reservas">Reservas</Link></li>}
             {user?.is_staff && <li><Link to="/gestionar-menus">Gestionar Menús</Link></li>}
+            { user?.is_staff && <li>
+                <Link to="/admin-panel"
+                >
+                  Panel Administrador
+                </Link>
+              </li>
+            }
           </ul>
         </div>
 
-        {/* Derecha: Carrito + Usuario */}
+        {/* Derecha */}
         <div className="hidden md:flex items-center gap-4 ml-auto text-sm font-medium relative">
           {user && pedido.length > 0 && (
             <button onClick={() => setModalAbierto(true)} className="relative bg-white">
@@ -43,7 +50,13 @@ const Navbar = () => {
           )}
           {user ? (
             <>
-              <span>👋 {user.first_name || user.username}</span>
+              <div className="flex items-center gap-2 text-black px-3 py-1 rounded-full ">
+                <span className="text-yellow-500 text-lg">👤</span>
+                <span className="text-sm font-medium capitalize ">{user.first_name && user.last_name
+                  ? `${user.first_name} ${user.last_name}`
+                  : user.username}
+                </span>
+              </div>
               <button
                 onClick={logoutUser}
                 className="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200 text-xs"
@@ -61,7 +74,14 @@ const Navbar = () => {
 
         {/* Menú móvil */}
         <div className="md:hidden flex items-center gap-2">
-          {user && <span className="pr-4">👋 {user.first_name || user.username}</span>}
+          {user && (
+            <span className="pr-4 text-sm font-medium capitalize text-black">
+              <span className="text-yellow-500 text-lg">👤</span>{' '}
+              {user.first_name && user.last_name
+                ? `${user.first_name} ${user.last_name}`
+                : user.username}
+            </span>
+          )}
           <button onClick={toggleMenu} className="text-gray-700 focus:outline-none">
             <HiOutlineMenu size={28} />
           </button>
@@ -78,6 +98,15 @@ const Navbar = () => {
             {user?.is_staff && (
               <Link to="/gestionar-menus" onClick={() => setIsOpen(false)} className="w-full">
                 Gestionar Menús
+              </Link>
+            )}
+            { user?.is_staff && (
+              <Link
+                to="/admin-panel"
+                onClick={() => setIsOpen(false)}
+                className="w-full "
+              >
+                Panel Administrador
               </Link>
             )}
             <div className="w-full pt-3 border-t">

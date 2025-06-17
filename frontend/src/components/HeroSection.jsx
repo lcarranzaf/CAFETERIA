@@ -1,16 +1,16 @@
-// src/components/HeroSection.jsx
 import React, { useEffect, useState, useContext } from 'react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { OrderContext } from '../context/OrderContext';
 import { Link } from 'react-router-dom';
-import SuccessModal from './SuccessModal';
+import Toast from './Toast';
 
 const HeroSection = () => {
   const { user } = useContext(AuthContext);
   const { agregarAlPedido } = useContext(OrderContext);
   const [destacado, setDestacado] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false); // ✅ estado del modal
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState(''); // ✅ Nuevo estado
 
   useEffect(() => {
     api.get('menus/')
@@ -26,8 +26,9 @@ const HeroSection = () => {
   const handleAgregar = () => {
     if (destacado && agregarAlPedido) {
       agregarAlPedido(destacado);
-      setModalVisible(true); // ✅ mostrar modal
-      setTimeout(() => setModalVisible(false), 2000); // ✅ ocultar tras 2 seg
+      setToastMessage(`${destacado.nombre} agregado al pedido`); // ✅ Mensaje dinámico
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2000);
     }
   };
 
@@ -58,15 +59,12 @@ const HeroSection = () => {
           className="w-64 md:w-80 rounded-xl mx-auto mt-7"
         />
 
-        {/* Valoración flotante más pequeña */}
         <div className="hidden md:block absolute -bottom-3 -right-3 bg-white border border-blue-300 rounded-lg p-2 shadow text-center w-20">
           <span className="text-yellow-500 text-base">⭐</span>
           <p className="text-xs font-medium">4.2</p>
           <p className="text-[10px] text-gray-500">Valoraciones</p>
         </div>
 
-
-        {/* Contenido debajo en móvil */}
         {destacado && (
           <div className="mt-4">
             <h2 className="text-xl font-semibold">{destacado.nombre}</h2>
@@ -88,11 +86,11 @@ const HeroSection = () => {
         )}
       </div>
 
-      {/* ✅ Modal de éxito */}
-      <SuccessModal
-        isOpen={modalVisible}
-        onClose={() => setModalVisible(false)}
-        message="✅ Agregado al pedido"
+      {/* ✅ Toast con nombre dinámico */}
+      <Toast 
+        message={toastMessage} 
+        show={toastVisible} 
+        type="success" 
       />
     </section>
   );

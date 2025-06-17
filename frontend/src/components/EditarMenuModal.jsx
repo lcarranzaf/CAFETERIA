@@ -14,7 +14,7 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
       overlayClassName="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-start"
     >
       <h2 className="text-xl font-bold mb-4">Editar Menú</h2>
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4 ">
         <input
           name="nombre"
           value={form.nombre}

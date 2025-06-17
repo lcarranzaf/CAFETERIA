@@ -2,8 +2,8 @@ import React, { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import SuccessModal from './SuccessModal';
-
-const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar }) => {
+import MenuReviewForm from './MenuReviewForm';
+const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar,mostrarReview = true, }) => {
   const { user } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -59,7 +59,7 @@ const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar }) => {
         </button>
       )}
 
-      
+      {mostrarReview && <MenuReviewForm menuId={id} />} 
     </div>
   );
 };

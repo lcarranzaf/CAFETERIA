@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Modal from './Modal';
 import { OrderContext } from '../context/OrderContext';
 import { Link } from 'react-router-dom';
@@ -12,6 +12,16 @@ const PedidoModal = ({ isOpen, onClose }) => {
   const [comprobante, setComprobante] = useState(null);
 
   const total = pedido.reduce((acc, item) => acc + item.precio * item.cantidad, 0).toFixed(2);
+
+  // 🧼 Limpiar estados si el modal se cierra
+  useEffect(() => {
+    if (!isOpen) {
+      setOrderId(null);
+      setMensajeConfirmacion(false);
+      setMetodoPagoSeleccionado(null);
+      setComprobante(null);
+    }
+  }, [isOpen]);
 
   const handleConfirmarPedido = async () => {
     try {
@@ -39,7 +49,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
 
     const formData = new FormData();
     formData.append("comprobante_pago", comprobante);
-    formData.append("metodo_pago", metodoPagoSeleccionado); // 🔥 IMPORTANTE
+    formData.append("metodo_pago", metodoPagoSeleccionado);
 
     try {
       await api.patch(`orders/${orderId}/upload_comprobante/`, formData, {
@@ -145,8 +155,9 @@ const PedidoModal = ({ isOpen, onClose }) => {
                     type="file"
                     accept="image/*"
                     onChange={(e) => setComprobante(e.target.files[0])}
-                    className="mb-2"
+                    className="mb-2 p-4"
                   />
+                  <br></br>
                   <button
                     onClick={handleSubirComprobante}
                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
