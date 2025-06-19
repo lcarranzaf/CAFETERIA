@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom';
 import React from 'react';
 import {
   HiCheckCircle,
@@ -21,16 +22,18 @@ const bgColors = {
 };
 
 const Toast = ({ message, show, type = 'success' }) => {
-  return (
+  const toast = (
     <div
-      className={`fixed bottom-6 right-6 z-50 transition-all duration-500 ease-in-out transform ${
+      className={`fixed bottom-6 right-6 z-[9999] transition-all duration-500 ease-in-out transform ${
         show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-      } ${bgColors[type]} text-black capitalize font-bold px-5 py-3 rounded-xl shadow-lg flex items-center gap-3`}
+      } ${bgColors[type]} text-white font-bold px-5 py-3 rounded-xl shadow-lg flex items-center gap-3`}
     >
       {icons[type]}
       <span className="text-sm font-medium">{message}</span>
     </div>
   );
+
+  return ReactDOM.createPortal(toast, document.body);
 };
 
 export default Toast;

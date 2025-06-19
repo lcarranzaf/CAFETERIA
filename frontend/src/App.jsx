@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
@@ -9,13 +9,18 @@ import ReservaPage from './pages/ReservaPage';
 import CrearMenuPage from './pages/CrearMenuPage';
 import GestionarMenusPage from './pages/GestionarMenusPage';
 import AdminPanel from './pages/AdminPanel';
-import CrearAdminPage from './pages/CrearAdminPage'
+import CrearAdminPage from './pages/CrearAdminPage';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute'; 
 import AdminPedidosPage from './pages/AdminPedidosPage';
 import ResumenVentas from './pages/ResumenVentas';
+import Toast from './components/Toast'; // ✅ Importa el Toast
 
 function App() {
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+
   return (
     <Router>
       <Routes>
@@ -45,6 +50,9 @@ function App() {
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+
+      
+      <Toast message={toastMessage} show={toastVisible} type={toastType} />
     </Router>
   );
 }
