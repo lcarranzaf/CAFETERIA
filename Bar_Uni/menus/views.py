@@ -23,3 +23,5 @@ class MenuViewSet(viewsets.ModelViewSet):
         menu.destacado = True
         menu.save()
         return Response({'status': 'menu marcado como destacado'})
+    
+    

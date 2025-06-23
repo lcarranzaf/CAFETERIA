@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import EditarMenuModal from '../components/EditarMenuModal';
+import Toast from '../components/Toast'; // <--- IMPORTA EL TOAST
 
 const tipos = ['desayuno', 'almuerzo', 'piqueo', 'bebida'];
 
@@ -22,6 +23,14 @@ const GestionarMenusPage = () => {
     imagen: null,
     disponible: true,
   });
+
+  // --- Estado y función para Toast ---
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 2600);
+  };
+  // --- FIN Toast ---
 
   useEffect(() => {
     if (!user?.is_staff) return;
@@ -62,12 +71,12 @@ const GestionarMenusPage = () => {
     if (!user || !user.is_staff) return;
 
     if (!form.precio || parseFloat(form.precio) <= 0 || isNaN(parseFloat(form.precio))) {
-      alert('❌ El precio debe ser mayor a 0');
+      showToast('❌ El precio debe ser mayor a 0', 'warning');
       return;
     }
 
     if (modo === 'crear' && !form.imagen) {
-      alert('Debes seleccionar una imagen antes de enviar.');
+      showToast('Debes seleccionar una imagen antes de enviar.', 'warning');
       return;
     }
 
@@ -88,7 +97,7 @@ const GestionarMenusPage = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        alert('✅ Menú creado correctamente');
+        showToast('✅ Menú creado correctamente', 'success');
       } else {
         await api.put(`menus/${editandoId}/`, formData, {
           headers: {
@@ -96,7 +105,7 @@ const GestionarMenusPage = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        alert('✏️ Menú actualizado correctamente');
+        showToast('✏️ Menú actualizado correctamente', 'success');
         setModalAbierto(false);
       }
 
@@ -116,7 +125,7 @@ const GestionarMenusPage = () => {
       setMenus(res.data);
     } catch (err) {
       console.error('Error creando o editando menú:', err);
-      alert('❌ Error al guardar el menú');
+      showToast('❌ Error al guardar el menú', 'error');
     } finally {
       setSubiendo(false);
     }
@@ -128,7 +137,7 @@ const GestionarMenusPage = () => {
       <section className="py-10 px-4 md:px-20 max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-6">Gestionar Menús</h2>
 
-        <div className="flex gap-4 justify-center mb-6">
+        <div className="flex gap-4 justify-center mb-6 ">
           <button onClick={() => setModo('crear')} className={`px-4 py-2 rounded ${modo === 'crear' ? 'bg-indigo-600 text-white' : 'bg-white border'}`}>
             Crear Menú
           </button>
@@ -157,16 +166,26 @@ const GestionarMenusPage = () => {
         )}
 
         {modo === 'editar' && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-white">
             {menus.map((menu) => (
-              <div key={menu.id} className="bg-white p-4 rounded shadow text-center">
-                <img src={menu.imagen || '/plato.png'} alt={menu.nombre} className="w-full h-28 object-cover rounded" />
-                <h3 className="font-bold mt-2">{menu.nombre}</h3>
-                <p className="text-sm text-gray-600">{menu.descripcion}</p>
-                <p className="text-indigo-500 font-semibold">${menu.precio}</p>
+              <div
+                key={menu.id}
+                className="bg-amber-100 p-4 rounded shadow text-center flex flex-col justify-between h-full min-h-[330px]"
+              >
+                <div>
+                  <img
+                    src={menu.imagen || '/plato.png'}
+                    alt={menu.nombre}
+                    className="w-full h-32 object-contain bg-white rounded border border-gray-200"
+                  />
+                  <h3 className="font-bold mt-2">{menu.nombre}</h3>
+                  <p className="text-sm text-gray-600">{menu.descripcion}</p>
+                  <p className="text-indigo-500 font-semibold">${menu.precio}</p>
+                </div>
+
                 <button
                   onClick={() => handleEditClick(menu)}
-                  className="mt-2 bg-yellow-500 text-white py-1 px-3 rounded-full text-sm hover:bg-yellow-600 transition"
+                  className="mt-4 bg-yellow-500 text-white py-1 px-3 rounded-full text-sm hover:bg-yellow-600 transition"
                 >
                   ✏️ Editar
                 </button>
@@ -183,6 +202,11 @@ const GestionarMenusPage = () => {
           onClose={() => setModalAbierto(false)}
           onSubmit={handleSubmit}
         />
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <Toast message={toast.message} show={toast.show} type={toast.type} />
       )}
     </div>
   );

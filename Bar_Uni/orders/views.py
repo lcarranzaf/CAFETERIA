@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import Order
 from .serializers import OrderSerializer
 from users.permissions import IsAdminUser
+from math import floor
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -38,13 +39,39 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = self.get_object()
         if order.estado_reserva == 'entregado':
             return Response({'detail': 'No se puede modificar una orden ya entregada.'}, status=status.HTTP_400_BAD_REQUEST)
-        return super().update(request, *args, **kwargs)
+
+        estado_pago_anterior = order.estado_pago
+        response = super().update(request, *args, **kwargs)
+        order.refresh_from_db()
+
+        if estado_pago_anterior != 'verificado' and order.estado_pago == 'verificado' and not order.pago_verificado:
+            user = order.usuario
+            estrellas_ganadas = floor(order.total)
+            user.estrellas += estrellas_ganadas
+            user.save()
+            order.pago_verificado = True
+            order.save()
+
+        return response
 
     def partial_update(self, request, *args, **kwargs):
         order = self.get_object()
         if order.estado_reserva == 'entregado':
             return Response({'detail': 'No se puede modificar una orden ya entregada.'}, status=status.HTTP_400_BAD_REQUEST)
-        return super().partial_update(request, *args, **kwargs)
+
+        estado_pago_anterior = order.estado_pago
+        response = super().partial_update(request, *args, **kwargs)
+        order.refresh_from_db()
+
+        if estado_pago_anterior != 'verificado' and order.estado_pago == 'verificado' and not order.pago_verificado:
+            user = order.usuario
+            estrellas_ganadas = floor(order.total)
+            user.estrellas += estrellas_ganadas
+            user.save()
+            order.pago_verificado = True
+            order.save()
+
+        return response
 
     @action(detail=True, methods=['patch'], url_path='aprobar')
     def aprobar(self, request, pk=None):
@@ -54,14 +81,22 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         if estado_reserva:
             order.estado_reserva = estado_reserva
+
         if estado_pago:
+            if estado_pago == "verificado" and not order.pago_verificado:
+                user = order.usuario
+                estrellas_ganadas = floor(order.total)
+                user.estrellas += estrellas_ganadas
+                user.save()
+                order.pago_verificado = True  
+
             order.estado_pago = estado_pago
 
         order.save()
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
     def upload_comprobante(self, request, pk=None):
         order = self.get_object()
 

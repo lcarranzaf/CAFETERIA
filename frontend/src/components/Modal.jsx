@@ -1,30 +1,31 @@
-import React, { useEffect } from 'react';
+import { createPortal } from "react-dom"
 
-const Modal = ({ isOpen, onClose, title, children }) => {
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
+const Modal = ({ isOpen, onClose, children, size = "lg" }) => {
+  if (!isOpen) return null
 
-  if (!isOpen) return null;
+  const sizeClasses = {
+    sm: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-2xl",
+    full: "max-w-4xl",
+  }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-lg max-w-lg w-full mx-4 p-6 relative">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div
+        className={`bg-white text-black font-normal p-4 sm:p-6 rounded-xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto shadow-xl relative`}
+      >
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
+          className="absolute top-2 right-2 bg-gray-300 text-gray-950 hover:text-red-600 text-xl rounded-full px-2 z-10"
         >
-          &times;
+          ✕
         </button>
-        {title && <h2 className="text-xl font-semibold mb-4">{title}</h2>}
-        <div>{children}</div>
+        {children}
       </div>
-    </div>
-  );
-};
+    </div>,
+    document.getElementById("modal-root") || document.body,
+  )
+}
 
-export default Modal;
+export default Modal

@@ -5,12 +5,19 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # 👤 Serializer para el registro de usuarios
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    is_staff = serializers.BooleanField(default=False, required=False) 
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'first_name', 'last_name', 'telefono', 'password']
+        fields = ['username', 'email', 'first_name', 'last_name', 'telefono', 'password', 'is_staff']
 
     def create(self, validated_data):
+        request = self.context.get('request')
+        is_staff = validated_data.pop('is_staff', False)
+
+        if not request or not request.user.is_staff:
+            is_staff = False 
+
         user = CustomUser.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -19,6 +26,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             telefono=validated_data['telefono'],
             password=validated_data['password']
         )
+        user.is_staff = is_staff
+        user.save()
         return user
 # Serializer para obtener perfil del usuario autenticado (incluye is_staff)
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -42,3 +51,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['is_staff'] = user.is_staff
 
         return token
+
+class UsuarioSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'first_name', 'last_name']

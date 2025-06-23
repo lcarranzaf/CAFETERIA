@@ -46,10 +46,11 @@ const Home = () => {
       <HeroSection />
 
       {/* MENÚ DESTACADO */}
-      <section className="bg-gray-100 px-6 md:px-16 pt-20 pb-10">
+      <section className="bg-gray-100 px-6 md:px-16 pt-2 pb-10 mt-8">
         <h2 className="text-2xl font-bold text-center mb-6">Menú Destacado</h2>
         <MenuCarousel items={menus} />
       </section>
+
     </div>
   );
 };

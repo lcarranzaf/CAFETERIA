@@ -1,6 +1,8 @@
+# orders/serializers.py
 from rest_framework import serializers
 from .models import Order, OrderItem
 from menus.models import Menu
+from users.serializers import UsuarioSimpleSerializer  # importa el serializer del usuario
 
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_nombre = serializers.CharField(source='menu.nombre', read_only=True)
@@ -20,7 +22,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
     total = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    usuario = serializers.StringRelatedField(read_only=True)
+    usuario = UsuarioSimpleSerializer(read_only=True) 
 
     class Meta:
         model = Order
@@ -28,7 +30,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'id', 'usuario', 'fecha_orden', 'estado_reserva', 'estado_pago',
             'metodo_pago', 'comprobante_pago', 'total', 'items'
         ]
-        read_only_fields = ['id', 'usuario', 'fecha_orden', 'estado_reserva', 'estado_pago', 'total']
+        read_only_fields = ['id', 'usuario', 'fecha_orden', 'total']
 
     def validate_items(self, value):
         if not value:
@@ -37,7 +39,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-        usuario = validated_data.pop('usuario') 
+        usuario = validated_data.pop('usuario')
         order = Order.objects.create(usuario=usuario, **validated_data)
 
         for item_data in items_data:

@@ -1,5 +1,5 @@
 // src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect ,useContext} from 'react';
 import { jwtDecode } from 'jwt-decode';
 import api from '../services/api';
 import axios from 'axios';
@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
             setAuthTokens(newTokens);
             localStorage.setItem('authTokens', JSON.stringify(newTokens));
 
-            // También actualiza el usuario si quieres
             const refreshedUser = jwtDecode(res.data.access);
             setUser((prev) => ({ ...prev, ...refreshedUser }));
           } catch (error) {
@@ -66,7 +65,7 @@ export const AuthProvider = ({ children }) => {
           }
         }
       }
-    }, 30000); // Cada 30 segundos
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [authTokens]);
@@ -89,11 +88,25 @@ export const AuthProvider = ({ children }) => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem('authTokens');
+    localStorage.removeItem('pedido');
+
+    // ✅ Dispara evento de logout
+    const event = new Event('logout');
+    window.dispatchEvent(event);
+  };
+  const actualizarPerfil = async () => {
+    try {
+      const res = await api.get('auth/profile/');
+      setUser((prev) => ({ ...prev, ...res.data }));
+    } catch (err) {
+      console.error("❌ Error al refrescar perfil:", err);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, authTokens, loginUser, logoutUser }}>
+    <AuthContext.Provider value={{ user, authTokens, loginUser, logoutUser, actualizarPerfil }}>
       {children}
     </AuthContext.Provider>
   );
 };
+export const useAuth = () => useContext(AuthContext);

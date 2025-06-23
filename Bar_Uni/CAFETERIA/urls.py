@@ -21,6 +21,10 @@ urlpatterns = [
     path('api/', include('menus.urls')),
     path('api/', include('reservations.urls')),
     path('api/', include('orders.urls')),
+    path('api/', include('reports.urls')),
+    path('api/', include('reviews.urls')),
+    path('api/', include('rewards.urls')),
+    path('api/', include('chatbot.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
