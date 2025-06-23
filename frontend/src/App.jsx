@@ -14,7 +14,10 @@ import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute'; 
 import AdminPedidosPage from './pages/AdminPedidosPage';
 import ResumenVentas from './pages/ResumenVentas';
-import Toast from './components/Toast'; // ✅ Importa el Toast
+import Toast from './components/Toast'; 
+import RecompensasList from './components/rewards/RecompensasList';
+import CrearRecompensa from './components/rewards/CrearRecompensa';
+import HistorialRecompensas from './components/rewards/HistorialRecompensas';
 
 function App() {
   const [toastVisible, setToastVisible] = useState(false);
@@ -35,6 +38,8 @@ function App() {
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/pedido" element={<PedidoPage />} />
           <Route path="/reservas" element={<ReservaPage />} />
+          <Route path="/recompensas" element={<RecompensasList />} />
+          <Route path="/historial-recompensas" element={<HistorialRecompensas />} />
         </Route>
 
         {/* Rutas solo para administradores */}
@@ -45,6 +50,7 @@ function App() {
           <Route path="/admin-panel/crear-admin" element={<CrearAdminPage />} />
           <Route path="/admin-panel/pedidos" element={<AdminPedidosPage />} />
           <Route path="/admin-panel/resumen-ventas" element={<ResumenVentas />} />
+          <Route path="/admin-panel/recompensas/nueva" element={<CrearRecompensa />} />
         </Route>
 
         {/* Catch all */}

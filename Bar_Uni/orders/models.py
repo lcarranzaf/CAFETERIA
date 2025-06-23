@@ -28,10 +28,12 @@ class Order(models.Model):
     comprobante_pago = models.ImageField(upload_to='comprobantes/', blank=True, null=True)
 
     total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00')) 
+    pago_verificado = models.BooleanField(default=False)
+    
     id = models.AutoField(primary_key=True)
 
     def actualizar_total(self):
-        total = sum(item.subtotal for item in self.items.all())  # type: ignore
+        total = sum(item.subtotal for item in self.items.all())  
         self.total = total
         self.save()
 

@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import EditarMenuModal from '../components/EditarMenuModal';
+import Toast from '../components/Toast'; // <--- IMPORTA EL TOAST
 
 const tipos = ['desayuno', 'almuerzo', 'piqueo', 'bebida'];
 
@@ -22,6 +23,14 @@ const GestionarMenusPage = () => {
     imagen: null,
     disponible: true,
   });
+
+  // --- Estado y función para Toast ---
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 2600);
+  };
+  // --- FIN Toast ---
 
   useEffect(() => {
     if (!user?.is_staff) return;
@@ -62,12 +71,12 @@ const GestionarMenusPage = () => {
     if (!user || !user.is_staff) return;
 
     if (!form.precio || parseFloat(form.precio) <= 0 || isNaN(parseFloat(form.precio))) {
-      alert('❌ El precio debe ser mayor a 0');
+      showToast('❌ El precio debe ser mayor a 0', 'warning');
       return;
     }
 
     if (modo === 'crear' && !form.imagen) {
-      alert('Debes seleccionar una imagen antes de enviar.');
+      showToast('Debes seleccionar una imagen antes de enviar.', 'warning');
       return;
     }
 
@@ -88,7 +97,7 @@ const GestionarMenusPage = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        alert('✅ Menú creado correctamente');
+        showToast('✅ Menú creado correctamente', 'success');
       } else {
         await api.put(`menus/${editandoId}/`, formData, {
           headers: {
@@ -96,7 +105,7 @@ const GestionarMenusPage = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        alert('✏️ Menú actualizado correctamente');
+        showToast('✏️ Menú actualizado correctamente', 'success');
         setModalAbierto(false);
       }
 
@@ -116,7 +125,7 @@ const GestionarMenusPage = () => {
       setMenus(res.data);
     } catch (err) {
       console.error('Error creando o editando menú:', err);
-      alert('❌ Error al guardar el menú');
+      showToast('❌ Error al guardar el menú', 'error');
     } finally {
       setSubiendo(false);
     }
@@ -184,7 +193,6 @@ const GestionarMenusPage = () => {
             ))}
           </div>
         )}
-
       </section>
 
       {modalAbierto && (
@@ -194,6 +202,11 @@ const GestionarMenusPage = () => {
           onClose={() => setModalAbierto(false)}
           onSubmit={handleSubmit}
         />
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <Toast message={toast.message} show={toast.show} type={toast.type} />
       )}
     </div>
   );

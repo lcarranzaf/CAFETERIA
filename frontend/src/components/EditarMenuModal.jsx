@@ -1,20 +1,12 @@
 // src/components/EditarMenuModal.jsx
-import React from 'react';
-import Modal from 'react-modal';
-
-Modal.setAppElement('#root');
+import Modal from "./Modal"; // Usa tu modal personalizado aquí
+import React from "react";
 
 const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
   return (
-    <Modal
-      isOpen={true}
-      onRequestClose={onClose}
-      contentLabel="Editar Menú"
-      className="bg-white max-w-lg mx-auto mt-20 p-6 rounded shadow-md"
-      overlayClassName="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-start"
-    >
+    <Modal isOpen={true} onClose={onClose} size="lg">
       <h2 className="text-xl font-bold mb-4">Editar Menú</h2>
-      <form onSubmit={onSubmit} className="space-y-4 ">
+      <form onSubmit={onSubmit} className="space-y-4">
         <input
           name="nombre"
           value={form.nombre}
@@ -60,7 +52,7 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
           className="w-full"
           accept="image/*"
         />
-        <div className="flex items-center gap-2 font-bold text-black ">
+        <div className="flex items-center gap-2 font-bold text-black">
           <input
             type="checkbox"
             name="disponible"

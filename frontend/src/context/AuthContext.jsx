@@ -1,5 +1,5 @@
 // src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect ,useContext} from 'react';
 import { jwtDecode } from 'jwt-decode';
 import api from '../services/api';
 import axios from 'axios';
@@ -94,10 +94,19 @@ export const AuthProvider = ({ children }) => {
     const event = new Event('logout');
     window.dispatchEvent(event);
   };
+  const actualizarPerfil = async () => {
+    try {
+      const res = await api.get('auth/profile/');
+      setUser((prev) => ({ ...prev, ...res.data }));
+    } catch (err) {
+      console.error("❌ Error al refrescar perfil:", err);
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, authTokens, loginUser, logoutUser }}>
+    <AuthContext.Provider value={{ user, authTokens, loginUser, logoutUser, actualizarPerfil }}>
       {children}
     </AuthContext.Provider>
   );
 };
+export const useAuth = () => useContext(AuthContext);
