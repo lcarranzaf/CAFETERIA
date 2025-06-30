@@ -102,10 +102,10 @@ const CrearAdminPage = () => {
                   placeholder="Nombre de usuario"
                   value={form.username}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                  className={`w-full px-4 py-3 border  rounded-lg focus:outline-none focus:ring-2 ${
                     usernameDisponible === false
                       ? 'border-red-500 focus:ring-red-300 bg-red-50'
-                      : 'border-gray-300 focus:ring-indigo-400 bg-indigo-50'
+                      : 'border-gray-900 focus:ring-indigo-400 bg-indigo-50'
                   }`}
                   required
                 />
@@ -124,7 +124,7 @@ const CrearAdminPage = () => {
                 placeholder="Nombre"
                 value={form.nombre}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border border-gray-900 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 required
               />
 
@@ -135,7 +135,7 @@ const CrearAdminPage = () => {
                 placeholder="Apellido"
                 value={form.apellido}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border border-gray-900 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 required
               />
 
@@ -146,7 +146,7 @@ const CrearAdminPage = () => {
                 placeholder="Correo electrónico"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border border-gray-900 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 required
               />
 
@@ -157,7 +157,7 @@ const CrearAdminPage = () => {
                 placeholder="Contraseña"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border border-gray-900 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 required
               />
 
@@ -168,7 +168,7 @@ const CrearAdminPage = () => {
                 placeholder="Teléfono"
                 value={form.telefono}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border border-gray-900 rounded-lg bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
 
               {/* Checkbox */}
@@ -193,7 +193,7 @@ const CrearAdminPage = () => {
               {/* Botón volver */}
               <Link
                 to="/admin-panel"
-                className="w-full inline-block text-center mt-2 bg-gray-300 hover:bg-gray-400 text-black py-2 rounded-lg font-medium transition"
+                className="w-full inline-block border border-gray-900 text-center mt-2 bg-gray-300 hover:bg-gray-400 text-black py-2 rounded-lg font-medium transition"
               >
                 <HiArrowLeft className="inline mr-1" /> Volver al panel
               </Link>
