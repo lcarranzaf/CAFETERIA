@@ -6,15 +6,17 @@ import api from "../services/api"
 import { HiOutlineCalendar } from "react-icons/hi"
 import ImagenQR from "../components/ImagenQQR"
 
-
 const ReservaPage = () => {
   const [ordenes, setOrdenes] = useState([])
   const [estadoReserva, setEstadoReserva] = useState(localStorage.getItem("estadoReserva") || "")
   const [estadoPago, setEstadoPago] = useState(localStorage.getItem("estadoPago") || "")
-  const [fechaSeleccionada, setFechaSeleccionada] = useState(localStorage.getItem("fechaSeleccionada") || "")
+  const [fechaDesde, setFechaDesde] = useState(localStorage.getItem("fechaDesde") || "")
+  const [fechaHasta, setFechaHasta] = useState(localStorage.getItem("fechaHasta") || "")
   const [comprobantes, setComprobantes] = useState({})
   const [isLoading, setIsLoading] = useState({})
-  const dateRef = useRef(null)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const dateDesdeRef = useRef(null)
+  const dateHastaRef = useRef(null)
 
   useEffect(() => {
     api
@@ -26,16 +28,19 @@ const ReservaPage = () => {
   useEffect(() => {
     localStorage.setItem("estadoReserva", estadoReserva)
     localStorage.setItem("estadoPago", estadoPago)
-    localStorage.setItem("fechaSeleccionada", fechaSeleccionada)
-  }, [estadoReserva, estadoPago, fechaSeleccionada])
+    localStorage.setItem("fechaDesde", fechaDesde)
+    localStorage.setItem("fechaHasta", fechaHasta)
+  }, [estadoReserva, estadoPago, fechaDesde, fechaHasta])
 
   const limpiarFiltros = () => {
     setEstadoReserva("")
     setEstadoPago("")
-    setFechaSeleccionada("")
+    setFechaDesde("")
+    setFechaHasta("")
     localStorage.removeItem("estadoReserva")
     localStorage.removeItem("estadoPago")
-    localStorage.removeItem("fechaSeleccionada")
+    localStorage.removeItem("fechaDesde")
+    localStorage.removeItem("fechaHasta")
   }
 
   const handleMetodoChange = (e, id) => {
@@ -51,6 +56,7 @@ const ReservaPage = () => {
     formData.append("comprobante_pago", file)
 
     setIsLoading((prev) => ({ ...prev, [orden.id]: true }))
+
     try {
       await api.patch(`orders/${orden.id}/upload_comprobante/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -90,289 +96,368 @@ const ReservaPage = () => {
     .filter((orden) => {
       const coincideEstadoReserva = estadoReserva ? orden.estado_reserva === estadoReserva : true
       const coincideEstadoPago = estadoPago ? orden.estado_pago === estadoPago : true
-      const coincideFecha = fechaSeleccionada
-        ? new Date(orden.fecha_orden).toLocaleDateString("en-CA") === fechaSeleccionada
-        : true
 
-      return coincideEstadoReserva && coincideEstadoPago && coincideFecha
+      // Filtro de rango de fechas
+      const fechaOrden = new Date(orden.fecha_orden).toLocaleDateString("en-CA")
+      const coincideFechaDesde = fechaDesde ? fechaOrden >= fechaDesde : true
+      const coincideFechaHasta = fechaHasta ? fechaOrden <= fechaHasta : true
+
+      return coincideEstadoReserva && coincideEstadoPago && coincideFechaDesde && coincideFechaHasta
     })
     .sort((a, b) => new Date(b.fecha_orden) - new Date(a.fecha_orden))
+
+  const contarFiltrosActivos = () => {
+    let count = 0
+    if (estadoReserva) count++
+    if (estadoPago) count++
+    if (fechaDesde) count++
+    if (fechaHasta) count++
+    return count
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Navbar />
 
-      <section className="max-w-6xl mx-auto py-8 px-4">
-        
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-3 bg-blue-100 rounded-xl">
-              <span className="text-3xl">🧾</span>
-            </div>
-            <h2 className="text-4xl font-bold text-slate-800">Tus Pedidos</h2>
-          </div>
-        </div>
-
-        
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 mb-8">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-            <span className="text-xl">🔍</span>
-            Filtros de búsqueda
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Estado de Reserva</label>
-              <select
-                value={estadoReserva}
-                onChange={(e) => setEstadoReserva(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-black"
-              >
-                <option value="">Todos</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="aceptado">Aceptado</option>
-                <option value="rechazado">Rechazado</option>
-                <option value="entregado">Entregado</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Estado de Pago</label>
-              <select
-                value={estadoPago}
-                onChange={(e) => setEstadoPago(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-black"
-              >
-                <option value="">Todos</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="verificado">Verificado</option>
-                <option value="rechazado">Rechazado</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Fecha exacta</label>
-              <div className="relative">
-                <input
-                  ref={dateRef}
-                  type="date"
-                  value={fechaSeleccionada}
-                  onChange={(e) => setFechaSeleccionada(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-black"
-                />
-                <HiOutlineCalendar
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 cursor-pointer hover:text-slate-700 transition-colors"
-                  onClick={() => {
-                    if (dateRef.current?.showPicker) {
-                      dateRef.current.showPicker()
-                    } else {
-                      dateRef.current.focus()
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-end">
+      <div className="flex pt-4">
+        {/* Sidebar de Filtros */}
+        <div
+          className={`${sidebarCollapsed ? "w-16" : "w-80"} transition-all duration-300 bg-white shadow-xl border-r border-slate-200 min-h-[calc(100vh-80px)] sticky top-20`}
+        >
+          <div className="p-6">
+            {/* Header del Sidebar */}
+            <div className="flex items-center justify-between mb-6">
+              {!sidebarCollapsed && (
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <span className="text-xl">🔍</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-800">Filtros</h3>
+                  {contarFiltrosActivos() > 0 && (
+                    <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                      {contarFiltrosActivos()}
+                    </span>
+                  )}
+                </div>
+              )}
               <button
-                onClick={limpiarFiltros}
-                className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
               >
-                <span className="flex items-center justify-center gap-2">
-                  <span>🗑️</span>
-                  Limpiar filtros
-                </span>
+                {sidebarCollapsed ? <span className="text-lg">🔍</span> : <span className="text-lg">✖️</span>}
               </button>
             </div>
+
+            {!sidebarCollapsed && (
+              <div className="space-y-6">
+                {/* Estado de Reserva */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                    <span className="text-lg">📦</span>
+                    Estado de Reserva
+                  </label>
+                  <select
+                    value={estadoReserva}
+                    onChange={(e) => setEstadoReserva(e.target.value)}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700"
+                  >
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="aceptado">Aceptado</option>
+                    <option value="rechazado">Rechazado</option>
+                    <option value="entregado">Entregado</option>
+                  </select>
+                </div>
+
+                {/* Estado de Pago */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                    <span className="text-lg">💳</span>
+                    Estado de Pago
+                  </label>
+                  <select
+                    value={estadoPago}
+                    onChange={(e) => setEstadoPago(e.target.value)}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700"
+                  >
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="verificado">Verificado</option>
+                    <option value="rechazado">Rechazado</option>
+                  </select>
+                </div>
+
+                {/* Rango de Fechas */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                    <span className="text-lg">📅</span>
+                    Rango de Fechas
+                  </label>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Desde</label>
+                      <div className="relative">
+                        <input
+                          ref={dateDesdeRef}
+                          type="date"
+                          value={fechaDesde}
+                          onChange={(e) => setFechaDesde(e.target.value)}
+                          className="w-full border border-slate-300 rounded-lg px-3 py-2.5 bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700"
+                        />
+                        <HiOutlineCalendar
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 cursor-pointer hover:text-slate-700 transition-colors"
+                          onClick={() => {
+                            if (dateDesdeRef.current?.showPicker) {
+                              dateDesdeRef.current.showPicker()
+                            } else {
+                              dateDesdeRef.current.focus()
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Hasta</label>
+                      <div className="relative">
+                        <input
+                          ref={dateHastaRef}
+                          type="date"
+                          value={fechaHasta}
+                          onChange={(e) => setFechaHasta(e.target.value)}
+                          className="w-full border border-slate-300 rounded-lg px-3 py-2.5 bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700"
+                        />
+                        <HiOutlineCalendar
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 cursor-pointer hover:text-slate-700 transition-colors"
+                          onClick={() => {
+                            if (dateHastaRef.current?.showPicker) {
+                              dateHastaRef.current.showPicker()
+                            } else {
+                              dateHastaRef.current.focus()
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botón Limpiar Filtros */}
+                <button
+                  onClick={limpiarFiltros}
+                  className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"
+                >
+                  <span>🗑️</span>
+                  Limpiar filtros
+                </button>
+
+                {/* Resumen de resultados */}
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-slate-800">{ordenesFiltradas.length}</p>
+                    <p className="text-sm text-slate-600">pedidos encontrados</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Lista de órdenes */}
-        {ordenesFiltradas.length === 0 ? (
-          <div className="text-center py-16 ">
-            <div className="p-6 bg-slate-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center ">
-              <span className="text-5xl">📋</span>
-            </div>
-            <p className="text-slate-500 text-xl">No se encontraron pedidos</p>
-            <p className="text-slate-400 mt-2">Intenta ajustar los filtros de búsqueda</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {ordenesFiltradas.map((orden) => (
-              <div
-                key={orden.id}
-                className="bg-gray-200 border border-slate-200 shadow-lg rounded-xl p-6 hover:shadow-xl transition-all duration-200"
-              >
-                {/* Header de la orden */}
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-200">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-100 rounded-lg">
-                      <span className="text-xl">📅</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-800">Pedido #{orden.id}</p>
-                      <p className="text-sm text-slate-600">{formatearFecha(orden.fecha_orden)}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-emerald-600">${Number(orden.total).toFixed(2)}</p>
-                  </div>
-                </div>
-
-                {/* Estados */}
-                <div className="flex flex-wrap gap-3 mb-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(
-                      orden.estado_reserva,
-                      "reserva",
-                    )}`}
-                  >
-                    Reserva: {orden.estado_reserva}
-                  </span>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(
-                      orden.estado_pago,
-                      "pago",
-                    )}`}
-                  >
-                    Pago: {orden.estado_pago}
-                  </span>
-                </div>
-
-                {/* Items del pedido */}
-                {orden.items && orden.items.length > 0 && (
-                  <div className="bg-slate-50 rounded-lg p-4 mb-4">
-                    <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                      <span>🍽️</span>
-                      Productos del pedido
-                    </h4>
-                    <ul className="space-y-2">
-                      {orden.items.map((item, idx) => (
-                        <li key={idx} className="flex justify-between items-center text-sm">
-                          <span className="text-slate-700">
-                            {item.menu_nombre} x {item.cantidad}
-                          </span>
-                          <span className="font-semibold text-slate-800">${Number(item.subtotal).toFixed(2)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Sección de pago - Igual que en PedidoModal */}
-                {orden.estado_pago === "pendiente" && !orden.comprobante_pago && (
-                  <div className="space-y-4 mt-6 pt-4 border-t border-slate-200">
-                    {/* Payment Method Selection */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-lg">💳</span>
-                        <h3 className="font-semibold text-slate-800">Método de pago</h3>
-                      </div>
-                      <select
-                        value={orden.metodo_pago || ""}
-                        onChange={(e) => handleMetodoChange(e, orden.id)}
-                        className="w-full md:w-auto px-4 py-2 border border-slate-300 rounded-lg text-black bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      >
-                        <option value="">Selecciona método</option>
-                        <option value="DEUNA">DEUNA</option>
-                      </select>
-                    </div>
-
-                    {/* DEUNA Payment Info + File Upload */}
-                    {orden.metodo_pago === "DEUNA" && (
-                      <>
-                        {/* DEUNA Info */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                          <div className="text-center space-y-3">
-                            <div className="flex items-center justify-center gap-2 mb-2">
-                              <span className="text-lg">📱</span>
-                              <h4 className="font-semibold text-blue-800">Pago con DEUNA</h4>
-                            </div>
-
-                            <a
-                              href="https://pagar.deuna.app/H92p/..."
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-                            >
-                              <span>🔗</span>
-                              Ir a DEUNA
-                            </a>
-
-                            <div className="bg-white p-3 rounded-lg border border-blue-200 inline-block">
-                              <ImagenQR className="transition-transform duration-300 ease-in-out hover:scale-110" />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* File Upload */}
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg">📄</span>
-                            <h3 className="font-semibold text-slate-800">Comprobante de pago</h3>
-                          </div>
-
-                          <div className="space-y-3">
-                            <label className="block">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) =>
-                                  setComprobantes((prev) => ({
-                                    ...prev,
-                                    [orden.id]: e.target.files[0],
-                                  }))
-                                }
-                                className="w-full p-3 border-2 border-dashed border-slate-300 rounded-lg bg-white hover:border-slate-400 transition-colors duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
-                              />
-                            </label>
-
-                            {comprobantes[orden.id] && (
-                              <div className="flex items-center gap-2 text-sm text-slate-600">
-                                <span>📎</span>
-                                <span>{comprobantes[orden.id]?.name}</span>
-                              </div>
-                            )}
-
-                            {comprobantes[orden.id] && (
-                              <button
-                                onClick={() => handleComprobanteUpload(orden)}
-                                disabled={isLoading[orden.id]}
-                                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                              >
-                                {isLoading[orden.id] ? (
-                                  <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    Subiendo...
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>📤</span>
-                                    Subir comprobante
-                                  </>
-                                )}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {/* Comprobante subido */}
-                {orden.comprobante_pago && (
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">✅</span>
-                      <p className="text-green-800 font-semibold">Comprobante subido correctamente</p>
-                    </div>
-                  </div>
-                )}
+        {/* Contenido Principal */}
+        <div className="flex-1 p-6">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <span className="text-3xl">🧾</span>
               </div>
-            ))}
+              <h2 className="text-4xl font-bold text-slate-800">Tus Pedidos</h2>
+            </div>
+            <p className="text-slate-600">Gestiona y revisa el estado de todos tus pedidos</p>
           </div>
-        )}
-      </section>
+
+          {/* Lista de órdenes */}
+          {ordenesFiltradas.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="p-6 bg-slate-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                <span className="text-5xl">📋</span>
+              </div>
+              <p className="text-slate-500 text-xl">No se encontraron pedidos</p>
+              <p className="text-slate-400 mt-2">Intenta ajustar los filtros de búsqueda</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {ordenesFiltradas.map((orden) => (
+                <div
+                  key={orden.id}
+                  className="bg-white border border-slate-200 shadow-lg rounded-xl p-6 hover:shadow-xl transition-all duration-200"
+                >
+                  {/* Header de la orden */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-slate-100 rounded-lg">
+                        <span className="text-xl">📅</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-800">Pedido #{orden.id}</p>
+                        <p className="text-sm text-slate-600">{formatearFecha(orden.fecha_orden)}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-emerald-600">${Number(orden.total).toFixed(2)}</p>
+                    </div>
+                  </div>
+
+                  {/* Estados */}
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(
+                        orden.estado_reserva,
+                        "reserva",
+                      )}`}
+                    >
+                      Reserva: {orden.estado_reserva}
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(
+                        orden.estado_pago,
+                        "pago",
+                      )}`}
+                    >
+                      Pago: {orden.estado_pago}
+                    </span>
+                  </div>
+
+                  {/* Items del pedido */}
+                  {orden.items && orden.items.length > 0 && (
+                    <div className="bg-slate-50 rounded-lg p-4 mb-4">
+                      <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                        <span>🍽️</span>
+                        Productos del pedido
+                      </h4>
+                      <ul className="space-y-2">
+                        {orden.items.map((item, idx) => (
+                          <li key={idx} className="flex justify-between items-center text-sm">
+                            <span className="text-slate-700">
+                              {item.menu_nombre} x {item.cantidad}
+                            </span>
+                            <span className="font-semibold text-slate-800">${Number(item.subtotal).toFixed(2)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Sección de pago */}
+                  {orden.estado_pago === "pendiente" && !orden.comprobante_pago && (
+                    <div className="space-y-4 mt-6 pt-4 border-t border-slate-200">
+                      {/* Payment Method Selection */}
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-lg">💳</span>
+                          <h3 className="font-semibold text-slate-800">Método de pago</h3>
+                        </div>
+                        <select
+                          value={orden.metodo_pago || ""}
+                          onChange={(e) => handleMetodoChange(e, orden.id)}
+                          className="w-full md:w-auto px-4 py-2 border border-slate-300 rounded-lg text-black bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        >
+                          <option value="">Selecciona método</option>
+                          <option value="DEUNA">DEUNA</option>
+                        </select>
+                      </div>
+
+                      {/* DEUNA Payment Info + File Upload */}
+                      {orden.metodo_pago === "DEUNA" && (
+                        <>
+                          {/* DEUNA Info */}
+                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <div className="text-center space-y-3">
+                              <div className="flex items-center justify-center gap-2 mb-2">
+                                <span className="text-lg">📱</span>
+                                <h4 className="font-semibold text-blue-800">Pago con DEUNA</h4>
+                              </div>
+                              <a
+                                href="https://pagar.deuna.app/H92p/..."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                              >
+                                <span>🔗</span>
+                                Ir a DEUNA
+                              </a>
+                              <div className="bg-white p-3 rounded-lg border border-blue-200 inline-block">
+                                <ImagenQR className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* File Upload */}
+                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-lg">📄</span>
+                              <h3 className="font-semibold text-slate-800">Comprobante de pago</h3>
+                            </div>
+                            <div className="space-y-3">
+                              <label className="block">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                    setComprobantes((prev) => ({
+                                      ...prev,
+                                      [orden.id]: e.target.files[0],
+                                    }))
+                                  }
+                                  className="w-full p-3 border-2 border-dashed border-slate-300 rounded-lg bg-white hover:border-slate-400 transition-colors duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
+                                />
+                              </label>
+                              {comprobantes[orden.id] && (
+                                <div className="flex items-center gap-2 text-sm text-slate-600">
+                                  <span>📎</span>
+                                  <span>{comprobantes[orden.id]?.name}</span>
+                                </div>
+                              )}
+                              {comprobantes[orden.id] && (
+                                <button
+                                  onClick={() => handleComprobanteUpload(orden)}
+                                  disabled={isLoading[orden.id]}
+                                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                  {isLoading[orden.id] ? (
+                                    <>
+                                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                      Subiendo...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>📤</span>
+                                      Subir comprobante
+                                    </>
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Comprobante subido */}
+                  {orden.comprobante_pago && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">✅</span>
+                        <p className="text-green-800 font-semibold">Comprobante subido correctamente</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

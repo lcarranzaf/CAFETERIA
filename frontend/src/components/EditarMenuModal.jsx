@@ -52,7 +52,7 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
           value={form.nombre}
           onChange={onChange}
           required
-          className="w-full border px-4 py-2 rounded text-black bg-gray-300"
+          className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
           placeholder="Nombre"
         />
         <textarea
@@ -60,7 +60,7 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
           value={form.descripcion}
           onChange={onChange}
           required
-          className="w-full border px-4 py-2 rounded text-black bg-gray-300"
+          className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
           placeholder="Descripción"
         ></textarea>
         <input
@@ -71,14 +71,14 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
           required
           min="0.01"
           step="0.01"
-          className="w-full border px-4 py-2 rounded text-black bg-gray-300"
+          className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
           placeholder="Precio"
         />
         <select
           name="tipo"
           value={form.tipo}
           onChange={onChange}
-          className="w-full border px-4 py-2 rounded text-black bg-gray-300"
+          className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
         >
           <option value="desayuno">Desayuno</option>
           <option value="almuerzo">Almuerzo</option>
@@ -101,7 +101,7 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
             <img
               src={preview}
               alt="Vista previa"
-              className="w-full h-40 object-contain rounded border"
+              className="w-full h-40 object-contain rounded border border-gray-900"
             />
             <button
               type="button"
