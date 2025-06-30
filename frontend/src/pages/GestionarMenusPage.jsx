@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import EditarMenuModal from '../components/EditarMenuModal';
-import Toast from '../components/Toast'; // <--- IMPORTA EL TOAST
+import Toast from '../components/Toast';
 
 const tipos = ['desayuno', 'almuerzo', 'piqueo', 'bebida'];
 
@@ -23,14 +23,13 @@ const GestionarMenusPage = () => {
     imagen: null,
     disponible: true,
   });
+  const [preview, setPreview] = useState(null);
 
-  // --- Estado y función para Toast ---
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 2600);
   };
-  // --- FIN Toast ---
 
   useEffect(() => {
     if (!user?.is_staff) return;
@@ -42,7 +41,11 @@ const GestionarMenusPage = () => {
     if (type === 'checkbox') {
       setForm({ ...form, [name]: checked });
     } else if (name === 'imagen') {
-      setForm({ ...form, imagen: files[0] });
+      const file = files[0];
+      if (file) {
+        setForm({ ...form, imagen: file });
+        setPreview(URL.createObjectURL(file));
+      }
     } else if (name === 'precio') {
       if (parseFloat(value) >= 0 || value === '') {
         setForm({ ...form, [name]: value });
@@ -52,6 +55,11 @@ const GestionarMenusPage = () => {
     }
   };
 
+  const handleRemoveImage = () => {
+    setForm({ ...form, imagen: null });
+    setPreview(null);
+  };
+
   const handleEditClick = (menu) => {
     setEditandoId(menu.id);
     setForm({
@@ -59,9 +67,10 @@ const GestionarMenusPage = () => {
       descripcion: menu.descripcion,
       precio: menu.precio,
       tipo: menu.tipo,
-      imagen: null,
+      imagen: menu.imagen || '', // ✅ Imagen del backend
       disponible: menu.disponible,
     });
+    setPreview(menu.imagen || null); // ✅ Mostrar imagen actual en el modal
     setModalAbierto(true);
   };
 
@@ -88,7 +97,9 @@ const GestionarMenusPage = () => {
       formData.append('precio', form.precio);
       formData.append('tipo', form.tipo);
       formData.append('disponible', form.disponible);
-      if (form.imagen) formData.append('imagen', form.imagen);
+      if (form.imagen instanceof File) {
+        formData.append('imagen', form.imagen);
+      }
 
       if (modo === 'crear') {
         await api.post('menus/', formData, {
@@ -109,7 +120,6 @@ const GestionarMenusPage = () => {
         setModalAbierto(false);
       }
 
-      // Reset
       setForm({
         nombre: '',
         descripcion: '',
@@ -118,6 +128,7 @@ const GestionarMenusPage = () => {
         imagen: null,
         disponible: true,
       });
+      setPreview(null);
       setEditandoId(null);
       setModo('crear');
 
@@ -135,7 +146,7 @@ const GestionarMenusPage = () => {
     <div className="min-h-screen bg-gray-100 text-black">
       <Navbar />
       <section className="py-10 px-4 md:px-20 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-6">Gestionar Menús</h2>
+        <h2 className="text-3xl font-bold text-center mb-6">Gestionar Menú</h2>
 
         <div className="flex gap-4 justify-center mb-6 ">
           <button onClick={() => setModo('crear')} className={`px-4 py-2 rounded ${modo === 'crear' ? 'bg-indigo-600 text-white' : 'bg-white border'}`}>
@@ -148,13 +159,41 @@ const GestionarMenusPage = () => {
 
         {modo === 'crear' && (
           <form onSubmit={handleSubmit} className="space-y-4 bg-white shadow rounded p-6 mb-8">
-            <input name="nombre" value={form.nombre} onChange={handleChange} required className="w-full border px-4 py-2 rounded bg-gray-300" placeholder="Nombre" />
-            <textarea name="descripcion" value={form.descripcion} onChange={handleChange} required className="w-full border px-4 py-2 rounded bg-gray-300" placeholder="Descripción"></textarea>
-            <input type="number" name="precio" value={form.precio} onChange={handleChange} required min="0.01" step="0.01" className="w-full border bg-gray-300 px-4 py-2 rounded" placeholder="Precio" />
-            <select name="tipo" value={form.tipo} onChange={handleChange} className="w-full border px-4 py-2 rounded bg-gray-300">
+            <input name="nombre" value={form.nombre} onChange={handleChange} required className="w-full border border-black px-4 py-2 rounded bg-gray-100" placeholder="Nombre" />
+            <textarea name="descripcion" value={form.descripcion} onChange={handleChange} required className="w-full border border-black px-4 py-2 rounded bg-gray-100" placeholder="Descripción"></textarea>
+            <input type="number" name="precio" value={form.precio} onChange={handleChange} required min="0.01" step="0.01" className="w-full border border-black bg-gray-100 px-4 py-2 rounded" placeholder="Precio" />
+            <select name="tipo" value={form.tipo} onChange={handleChange} className="w-full border border-black px-4 py-2 rounded bg-gray-100">
               {tipos.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
             </select>
-            <input type="file" name="imagen" onChange={handleChange} className="w-full" accept="image/*" required />
+
+            {!preview && (
+              <input
+                type="file"
+                name="imagen"
+                onChange={handleChange}
+                className="w-full"
+                accept="image/*"
+                required
+              />
+            )}
+
+            {preview && (
+              <div className="relative mt-2">
+                <img
+                  src={preview}
+                  alt="Vista previa"
+                  className="w-full h-40 object-contain rounded border"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700"
+                >
+                  Eliminar
+                </button>
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
               <input type="checkbox" name="disponible" checked={form.disponible} onChange={handleChange} />
               <label htmlFor="disponible">¿Disponible?</label>
@@ -204,7 +243,6 @@ const GestionarMenusPage = () => {
         />
       )}
 
-      {/* Toast Notification */}
       {toast.show && (
         <Toast message={toast.message} show={toast.show} type={toast.type} />
       )}

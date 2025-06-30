@@ -54,7 +54,6 @@ const HeroSection = () => {
           {/* LADO IZQUIERDO */}
           <div className="flex-1 text-center md:text-left max-w-2xl space-y-8 animate-fade-in-up">
             
-
             <div className="space-y-6">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 <span className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">

@@ -69,7 +69,7 @@ const Navbar = () => {
             </li>
             {user?.is_staff && (
               <li>
-                <Link to="/gestionar-menus">Gestionar Menús</Link>
+                <Link to="/gestionar-menus">Gestionar Menú</Link>
               </li>
             )}
             {user?.is_staff && (
@@ -214,7 +214,7 @@ const Navbar = () => {
                       onClick={closeMenu}
                       className="text-lg font-medium hover:text-indigo-600 hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg"
                     >
-                      Gestionar Menús
+                      Gestionar Menú
                     </Link>
                     <Link
                       to="/admin-panel"
