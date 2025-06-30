@@ -1,8 +1,48 @@
-// src/components/EditarMenuModal.jsx
-import Modal from "./Modal"; // Usa tu modal personalizado aquí
-import React from "react";
+import Modal from "./Modal";
+import React, { useEffect, useState } from "react";
 
 const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
+  const [preview, setPreview] = useState(null);
+
+  useEffect(() => {
+    if (!form) return;
+
+    if (form.imagen instanceof File) {
+      // Si es un archivo subido nuevo
+      setPreview(URL.createObjectURL(form.imagen));
+    } else if (typeof form.imagen === "string" && form.imagen !== "") {
+      // Si es una URL del backend
+      setPreview(form.imagen);
+    } else {
+      setPreview(null);
+    }
+  }, [form.imagen]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      onChange({
+        target: {
+          name: "imagen",
+          type: "file",
+          files: [file],
+        },
+      });
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    onChange({
+      target: {
+        name: "imagen",
+        type: "file",
+        files: [],
+      },
+    });
+    setPreview(null);
+  };
+
   return (
     <Modal isOpen={true} onClose={onClose} size="lg">
       <h2 className="text-xl font-bold mb-4">Editar Menú</h2>
@@ -45,13 +85,34 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
           <option value="piqueo">Piqueo</option>
           <option value="bebida">Bebida</option>
         </select>
-        <input
-          type="file"
-          name="imagen"
-          onChange={onChange}
-          className="w-full"
-          accept="image/*"
-        />
+
+        {!preview && (
+          <input
+            type="file"
+            name="imagen"
+            onChange={handleFileChange}
+            className="w-full"
+            accept="image/*"
+          />
+        )}
+
+        {preview && (
+          <div className="relative mt-2">
+            <img
+              src={preview}
+              alt="Vista previa"
+              className="w-full h-40 object-contain rounded border"
+            />
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700"
+            >
+              Eliminar
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center gap-2 font-bold text-black">
           <input
             type="checkbox"
