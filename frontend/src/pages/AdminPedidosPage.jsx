@@ -9,10 +9,10 @@ import { obtenerRecompensasPorUsuario, obtenerHistorialTodos } from "../services
 import { useAuth } from "../context/AuthContext"
 
 // Importar componentes
-import FilterSidebar from "../components/Gention_pedido_admin/FilterSidebar"
-import ViewToggle from "../components/Gention_pedido_admin/ViewToggle"
-import PedidoCard from "../components/Gention_pedido_admin/PedidoCard"
-import RecompensaCard from "../components/Gention_pedido_admin/RecompensaCard"
+import FilterSidebar from "../components/Gestion_pedido_admin/FilterSidebar"
+import ViewToggle from "../components/Gestion_pedido_admin/ViewToggle"
+import PedidoCard from "../components/Gestion_pedido_admin/PedidoCard"
+import RecompensaCard from "../components/Gestion_pedido_admin/RecompensaCard"
 
 const AdminPedidosPage = () => {
   const [ordenes, setOrdenes] = useState([])
