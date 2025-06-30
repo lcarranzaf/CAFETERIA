@@ -53,10 +53,7 @@ const HeroSection = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20">
           {/* LADO IZQUIERDO */}
           <div className="flex-1 text-center md:text-left max-w-2xl space-y-8 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-indigo-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium shadow-sm">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-              Disponible ahora
-            </div>
+            
 
             <div className="space-y-6">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
