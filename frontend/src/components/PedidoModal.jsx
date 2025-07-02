@@ -4,6 +4,7 @@ import { OrderContext } from "../context/OrderContext"
 import { Link } from "react-router-dom"
 import api from "../services/api"
 import Toast from "./Toast"
+import { useRef } from "react";
 
 const PedidoModal = ({ isOpen, onClose }) => {
   const { pedido, eliminarDelPedido, confirmarPedido, actualizarCantidadPedido } = useContext(OrderContext)
@@ -11,12 +12,13 @@ const PedidoModal = ({ isOpen, onClose }) => {
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState(false)
   const [metodoPagoSeleccionado, setMetodoPagoSeleccionado] = useState(null)
   const [comprobante, setComprobante] = useState(null)
+  const [previewComprobante, setPreviewComprobante] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [showToast, setShowToast] = useState(false)
+  const inputFileRef = useRef(null);
 
   const total = pedido.reduce((acc, item) => acc + item.precio * item.cantidad, 0).toFixed(2)
-
   const hayStockInsuficiente = pedido.some(item => item.cantidad > item.stock)
 
   useEffect(() => {
@@ -25,6 +27,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
       setMensajeConfirmacion(false)
       setMetodoPagoSeleccionado(null)
       setComprobante(null)
+      setPreviewComprobante(null)
       setIsLoading(false)
       setToastMessage('')
       setShowToast(false)
@@ -83,6 +86,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
       mostrarToast("Comprobante subido correctamente ✅")
       setMetodoPagoSeleccionado(null)
       setComprobante(null)
+      setPreviewComprobante(null)
       setTimeout(() => {
         onClose()
       }, 1500)
@@ -135,8 +139,6 @@ const PedidoModal = ({ isOpen, onClose }) => {
                             Subtotal: ${(item.precio * item.cantidad).toFixed(2)}
                           </p>
                         </div>
-
-                        {/* Quantity Controls con stock */}
                         <div className="flex flex-col items-start gap-1">
                           <span className="text-xs font-medium text-slate-600">Cantidad:</span>
                           <div className="flex items-center bg-white border border-slate-300 rounded overflow-hidden">
@@ -156,11 +158,12 @@ const PedidoModal = ({ isOpen, onClose }) => {
                               +
                             </button>
                           </div>
-
                           <p className="text-xs text-slate-500">
-                            Stock disponible: <span className={`font-semibold ${item.stock === 0 ? "text-red-500" : "text-emerald-600"}`}>{item.stock}</span>
+                            Stock disponible:{" "}
+                            <span className={`font-semibold ${item.stock === 0 ? "text-red-500" : "text-emerald-600"}`}>
+                              {item.stock}
+                            </span>
                           </p>
-
                           {item.cantidad > item.stock && (
                             <p className="text-xs text-red-500 font-medium mt-1">
                               Stock insuficiente para {item.nombre}
@@ -168,13 +171,12 @@ const PedidoModal = ({ isOpen, onClose }) => {
                           )}
                         </div>
                       </div>
-
                       <button
                         onClick={() => eliminarDelPedido(item.id)}
                         className="ml-2 p-1 bg-gray-300 text-red-500 hover:bg-red-400 rounded transition-colors group"
                         title="Eliminar producto"
                       >
-                        <span className="text-lg group-hover:scale-110 transition-transform duration-150 inline-block ">🗑️</span>
+                        <span className="text-lg group-hover:scale-110 transition-transform duration-150 inline-block">🗑️</span>
                       </button>
                     </div>
                   </div>
@@ -261,11 +263,43 @@ const PedidoModal = ({ isOpen, onClose }) => {
                       </div>
                       <div className="space-y-3">
                         <input
+                          ref={inputFileRef}
                           type="file"
                           accept="image/*"
-                          onChange={(e) => setComprobante(e.target.files[0])}
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              setComprobante(file);
+                              setPreviewComprobante(URL.createObjectURL(file));
+                            }
+                          }}
                           className="w-full p-3 border-2 border-dashed border-slate-300 rounded-lg bg-white hover:border-slate-400 transition-colors duration-200 text-sm file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
                         />
+
+                        {previewComprobante && (
+                          <div className="mt-2 text-center">
+                            <p className="text-sm text-slate-600 mb-2">Vista previa del comprobante:</p>
+                            <img
+                              src={previewComprobante}
+                              alt="Vista previa del comprobante"
+                              className="w-40 h-40 object-contain mx-auto border rounded"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setComprobante(null);
+                                setPreviewComprobante(null);
+                                if (inputFileRef.current) {
+                                  inputFileRef.current.value = null;
+                                }
+                              }}
+                              className="mt-2 text-red-500 hover:underline text-sm"
+                            >
+                              Eliminar comprobante seleccionado
+                            </button>
+                          </div>
+                        )}
+
                         <button
                           onClick={handleSubirComprobante}
                           disabled={!comprobante || isLoading}
@@ -294,7 +328,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
                     <p className="text-green-800 font-semibold">Pedido confirmado correctamente</p>
                   </div>
                   <p className="text-slate-600 text-sm">
-                    Revisa tus {" "}
+                    Revisa tus{" "}
                     <Link
                       to="/reservas"
                       className="text-emerald-600 hover:text-emerald-700 font-medium underline underline-offset-2"
