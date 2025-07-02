@@ -9,39 +9,45 @@ const MenuCarousel = ({ items }) => {
   const { agregarAlPedido } = useContext(OrderContext);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [carouselItems, setCarouselItems] = useState(items); // <- nuevo estado
 
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({
-        left: direction === 'left' ? -300 : 300,
-        behavior: 'smooth',
-      });
-    }
+  const scrollLeft = () => {
+    const updatedItems = [...carouselItems];
+    const last = updatedItems.pop();
+    updatedItems.unshift(last);
+    setCarouselItems(updatedItems);
+  };
+
+  const scrollRight = () => {
+    const updatedItems = [...carouselItems];
+    const first = updatedItems.shift();
+    updatedItems.push(first);
+    setCarouselItems(updatedItems);
   };
 
   const handleAgregar = (item) => {
     agregarAlPedido(item);
-    setToastMessage(` ${item.nombre} agregado al pedido`);
+    setToastMessage(`${item.nombre} agregado al pedido`);
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2000);
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* Botón Izquierdo */}
       <button
-        onClick={() => scroll('left')}
+        onClick={scrollLeft}
         className="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-300 border rounded-full p-2 shadow z-10"
       >
         ◀
       </button>
 
-      {/* Carrusel de Menús */}
+      {/* Carrusel */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-hidden scrollbar-hide gap-6 px-4 py-2 scroll-smooth snap-x snap-mandatory"
+        className="flex overflow-x-hidden scrollbar-hide gap-6 px-12 py-2 scroll-smooth snap-x snap-mandatory justify-center"
       >
-        {items.map((item) => (
+        {carouselItems.map((item) => (
           <div
             key={item.id}
             className="min-w-[250px] max-w-[250px] snap-start flex-shrink-0"
@@ -54,11 +60,10 @@ const MenuCarousel = ({ items }) => {
                 precio={item.precio}
                 imagen={item.imagen || '/placeholder.png'}
                 onAgregar={() => handleAgregar(item)}
-                promedio={item.promedio_calificacion} 
-                cantidad={item.cantidad_reviews} 
+                promedio={item.promedio_calificacion}
+                cantidad={item.cantidad_reviews}
                 extraContent={<MenuReviewForm menuId={item.id} />}
               />
-
             </div>
           </div>
         ))}
@@ -66,7 +71,7 @@ const MenuCarousel = ({ items }) => {
 
       {/* Botón Derecho */}
       <button
-        onClick={() => scroll('right')}
+        onClick={scrollRight}
         className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-300 border rounded-full p-2 shadow z-10"
       >
         ▶
