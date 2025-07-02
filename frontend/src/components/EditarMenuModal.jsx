@@ -1,17 +1,15 @@
 import Modal from "./Modal";
 import React, { useEffect, useState } from "react";
 
-const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
+const EditarMenuModal = ({ form, onChange, onClose, onSubmit, error }) => {
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     if (!form) return;
 
     if (form.imagen instanceof File) {
-      // Si es un archivo subido nuevo
       setPreview(URL.createObjectURL(form.imagen));
     } else if (typeof form.imagen === "string" && form.imagen !== "") {
-      // Si es una URL del backend
       setPreview(form.imagen);
     } else {
       setPreview(null);
@@ -47,14 +45,20 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
     <Modal isOpen={true} onClose={onClose} size="lg">
       <h2 className="text-xl font-bold mb-4">Editar Menú</h2>
       <form onSubmit={onSubmit} className="space-y-4">
-        <input
-          name="nombre"
-          value={form.nombre}
-          onChange={onChange}
-          required
-          className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
-          placeholder="Nombre"
-        />
+        <div>
+          <input
+            name="nombre"
+            value={form.nombre}
+            onChange={onChange}
+            required
+            className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
+            placeholder="Nombre"
+          />
+          {error?.nombre && (
+            <p className="text-red-600 text-sm mt-1">{error.nombre}</p>
+          )}
+        </div>
+
         <textarea
           name="descripcion"
           value={form.descripcion}
@@ -63,6 +67,7 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
           className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
           placeholder="Descripción"
         ></textarea>
+
         <input
           type="number"
           name="precio"
@@ -74,6 +79,19 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
           className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
           placeholder="Precio"
         />
+
+        <input
+          type="number"
+          name="stock"
+          value={form.stock}
+          onChange={onChange}
+          required
+          min="0"
+          step="1"
+          className="w-full border border-gray-900 px-4 py-2 rounded text-black bg-gray-100"
+          placeholder="Stock disponible"
+        />
+
         <select
           name="tipo"
           value={form.tipo}
@@ -122,6 +140,7 @@ const EditarMenuModal = ({ form, onChange, onClose, onSubmit }) => {
           />
           <label htmlFor="disponible">¿Disponible?</label>
         </div>
+
         <div className="flex justify-between mt-6">
           <button
             type="button"

@@ -86,7 +86,7 @@ const FilterSidebar = ({
               <>
                 {/* Rango de Fechas para Pedidos */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">📅</span>
                     Rango de Fechas
                   </label>
@@ -124,7 +124,7 @@ const FilterSidebar = ({
 
                 {/* Usuario */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">👤</span>
                     Usuario
                   </label>
@@ -139,7 +139,7 @@ const FilterSidebar = ({
 
                 {/* Estado de Reserva */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">📦</span>
                     Estado de Reserva
                   </label>
@@ -158,7 +158,7 @@ const FilterSidebar = ({
 
                 {/* Estado de Pago */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">💳</span>
                     Estado de Pago
                   </label>
@@ -176,7 +176,7 @@ const FilterSidebar = ({
 
                 {/* Ordenamiento */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">🔄</span>
                     Ordenar por
                   </label>
@@ -215,7 +215,7 @@ const FilterSidebar = ({
               <>
                 {/* Rango de Fechas */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">📅</span>
                     Rango de Fechas
                   </label>
@@ -253,7 +253,7 @@ const FilterSidebar = ({
 
                 {/* Usuario */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">👤</span>
                     Usuario
                   </label>
@@ -268,7 +268,7 @@ const FilterSidebar = ({
 
                 {/* Recompensa */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3  items-center gap-2">
                     <span className="text-lg">🎁</span>
                     Recompensa
                   </label>

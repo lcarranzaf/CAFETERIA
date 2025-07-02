@@ -1,5 +1,3 @@
-"use client"
-
 import { useContext, useEffect, useState } from "react"
 import Modal from "./Modal"
 import { OrderContext } from "../context/OrderContext"
@@ -18,6 +16,8 @@ const PedidoModal = ({ isOpen, onClose }) => {
   const [showToast, setShowToast] = useState(false)
 
   const total = pedido.reduce((acc, item) => acc + item.precio * item.cantidad, 0).toFixed(2)
+
+  const hayStockInsuficiente = pedido.some(item => item.cantidad > item.stock)
 
   useEffect(() => {
     if (!isOpen) {
@@ -53,8 +53,13 @@ const PedidoModal = ({ isOpen, onClose }) => {
   }
 
   const handleActualizarCantidad = (id, nuevaCantidad) => {
+    const item = pedido.find(p => p.id === id)
+    if (!item) return
+
     if (nuevaCantidad < 1) {
       eliminarDelPedido(id)
+    } else if (nuevaCantidad > item.stock) {
+      mostrarToast(`❌ Stock agotado para ${item.nombre}`)
     } else {
       actualizarCantidadPedido(id, nuevaCantidad)
     }
@@ -79,8 +84,8 @@ const PedidoModal = ({ isOpen, onClose }) => {
       setMetodoPagoSeleccionado(null)
       setComprobante(null)
       setTimeout(() => {
-        onClose();
-      }, 1500);
+        onClose()
+      }, 1500)
     } catch (error) {
       console.error("Error al subir comprobante:", error)
       alert("❌ Error al subir comprobante.")
@@ -131,13 +136,14 @@ const PedidoModal = ({ isOpen, onClose }) => {
                           </p>
                         </div>
 
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2">
+                        {/* Quantity Controls con stock */}
+                        <div className="flex flex-col items-start gap-1">
                           <span className="text-xs font-medium text-slate-600">Cantidad:</span>
                           <div className="flex items-center bg-white border border-slate-300 rounded overflow-hidden">
                             <button
                               onClick={() => handleActualizarCantidad(item.id, item.cantidad - 1)}
                               className="px-2 py-1 bg-gray-300 hover:bg-slate-100 transition-colors text-slate-600 hover:text-slate-800 font-bold"
+                              disabled={item.cantidad <= 1}
                             >
                               −
                             </button>
@@ -145,10 +151,21 @@ const PedidoModal = ({ isOpen, onClose }) => {
                             <button
                               onClick={() => handleActualizarCantidad(item.id, item.cantidad + 1)}
                               className="px-2 py-1 bg-gray-300 hover:bg-slate-100 transition-colors text-slate-600 hover:text-slate-800 font-bold"
+                              disabled={item.cantidad >= item.stock}
                             >
                               +
                             </button>
                           </div>
+
+                          <p className="text-xs text-slate-500">
+                            Stock disponible: <span className={`font-semibold ${item.stock === 0 ? "text-red-500" : "text-emerald-600"}`}>{item.stock}</span>
+                          </p>
+
+                          {item.cantidad > item.stock && (
+                            <p className="text-xs text-red-500 font-medium mt-1">
+                              Stock insuficiente para {item.nombre}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -157,9 +174,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
                         className="ml-2 p-1 bg-gray-300 text-red-500 hover:bg-red-400 rounded transition-colors group"
                         title="Eliminar producto"
                       >
-                        <span className="text-lg group-hover:scale-110 transition-transform duration-150 inline-block ">
-                          🗑️
-                        </span>
+                        <span className="text-lg group-hover:scale-110 transition-transform duration-150 inline-block ">🗑️</span>
                       </button>
                     </div>
                   </div>
@@ -177,7 +192,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
                   <button
                     className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-2 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     onClick={handleConfirmarPedido}
-                    disabled={isLoading}
+                    disabled={isLoading || hayStockInsuficiente}
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center gap-2">
@@ -195,9 +210,9 @@ const PedidoModal = ({ isOpen, onClose }) => {
               </div>
             )}
 
+            {/* Confirmación de pedido y subida de comprobante */}
             {mensajeConfirmacion && (
               <div className="space-y-4">
-                {/* Método de pago */}
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">💳</span>
@@ -218,7 +233,6 @@ const PedidoModal = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {/* Info y QR DEUNA */}
                 {metodoPagoSeleccionado === "DEUNA" && (
                   <>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center space-y-3">
@@ -240,7 +254,6 @@ const PedidoModal = ({ isOpen, onClose }) => {
                       </div>
                     </div>
 
-                    {/* Subir comprobante */}
                     <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-lg">📄</span>
@@ -275,14 +288,13 @@ const PedidoModal = ({ isOpen, onClose }) => {
                   </>
                 )}
 
-                {/* Confirmación */}
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <span className="text-xl">✅</span>
                     <p className="text-green-800 font-semibold">Pedido confirmado correctamente</p>
                   </div>
                   <p className="text-slate-600 text-sm">
-                    Revisa tus{" "}
+                    Revisa tus {" "}
                     <Link
                       to="/reservas"
                       className="text-emerald-600 hover:text-emerald-700 font-medium underline underline-offset-2"
@@ -298,8 +310,6 @@ const PedidoModal = ({ isOpen, onClose }) => {
           </>
         )}
       </Modal>
-
-      {/* ✅ Toast de éxito */}
       <Toast message={toastMessage} show={showToast} type="success" />
     </>
   )

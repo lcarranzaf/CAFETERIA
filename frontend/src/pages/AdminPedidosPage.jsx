@@ -7,8 +7,8 @@ import { HiArrowLeft } from "react-icons/hi"
 import { Link } from "react-router-dom"
 import { obtenerRecompensasPorUsuario, obtenerHistorialTodos } from "../services/recompensasService"
 import { useAuth } from "../context/AuthContext"
+import Toast from "../components/Toast"
 
-// Importar componentes
 import FilterSidebar from "../components/Gestion_pedido_admin/FilterSidebar"
 import ViewToggle from "../components/Gestion_pedido_admin/ViewToggle"
 import PedidoCard from "../components/Gestion_pedido_admin/PedidoCard"
@@ -37,7 +37,8 @@ const AdminPedidosPage = () => {
 
   const { authTokens } = useAuth()
   const dateRef = useRef(null)
-  const dateHastaRef = useRef(null) // Agregar este nuevo ref
+  const dateHastaRef = useRef(null) 
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   useEffect(() => {
     api
@@ -45,6 +46,12 @@ const AdminPedidosPage = () => {
       .then((res) => setOrdenes(res.data))
       .catch((err) => console.error("Error al cargar órdenes:", err))
   }, [])
+  const mostrarToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }));
+    }, 3000);
+  };
 
   useEffect(() => {
     const cargarRecompensas = async () => {
@@ -64,6 +71,8 @@ const AdminPedidosPage = () => {
 
     if (ordenes.length > 0) cargarRecompensas()
   }, [ordenes, authTokens])
+
+
 
   useEffect(() => {
     const cargarTodosCanjes = async () => {
@@ -93,20 +102,29 @@ const AdminPedidosPage = () => {
     }))
   }
 
-  const guardarCambios = async (id) => {
-    if (!actualizados[id]) return
-
-    setIsLoading((prev) => ({ ...prev, [id]: true }))
-    try {
-      await api.patch(`orders/${id}/`, actualizados[id])
-      alert("✅ Cambios guardados")
-      window.location.reload()
-    } catch (error) {
-      alert("❌ Error al guardar cambios")
-    } finally {
-      setIsLoading((prev) => ({ ...prev, [id]: false }))
+ const guardarCambios = async (id) => {
+    const cambios = actualizados[id];
+    if (!cambios || (!cambios.estado_reserva && !cambios.estado_pago)) {
+      mostrarToast("⚠️ No hay cambios para guardar", "warning");
+      return;
     }
-  }
+
+    const payload = {};
+    if (cambios.estado_reserva) payload.estado_reserva = cambios.estado_reserva;
+    if (cambios.estado_pago) payload.estado_pago = cambios.estado_pago;
+
+    setIsLoading((prev) => ({ ...prev, [id]: true }));
+    try {
+      await api.patch(`orders/${id}/aprobar/`, payload);
+      mostrarToast("✅ Cambios guardados exitosamente", "success");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al guardar:", error.response?.data || error.message);
+      mostrarToast("❌ Error al guardar cambios", "error");
+    } finally {
+      setIsLoading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
 
   const limpiarFiltros = () => {
     setFechaSeleccionada("")

@@ -46,6 +46,7 @@ class OrderItem(models.Model):
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00')) 
+    stock_descuentado = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.subtotal = self.menu.precio * self.cantidad

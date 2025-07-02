@@ -22,6 +22,7 @@ const GestionarMenusPage = () => {
     tipo: 'desayuno',
     imagen: null,
     disponible: true,
+    stock: '',
   });
   const [preview, setPreview] = useState(null);
 
@@ -46,8 +47,8 @@ const GestionarMenusPage = () => {
         setForm({ ...form, imagen: file });
         setPreview(URL.createObjectURL(file));
       }
-    } else if (name === 'precio') {
-      if (parseFloat(value) >= 0 || value === '') {
+    } else if (name === 'precio' || name === 'stock') {
+      if ((parseFloat(value) >= 0 && value !== '') || value === '') {
         setForm({ ...form, [name]: value });
       }
     } else {
@@ -67,10 +68,11 @@ const GestionarMenusPage = () => {
       descripcion: menu.descripcion,
       precio: menu.precio,
       tipo: menu.tipo,
-      imagen: menu.imagen || '', // ✅ Imagen del backend
+      imagen: menu.imagen || '',
       disponible: menu.disponible,
+      stock: menu.stock || '',
     });
-    setPreview(menu.imagen || null); // ✅ Mostrar imagen actual en el modal
+    setPreview(menu.imagen || null);
     setModalAbierto(true);
   };
 
@@ -81,6 +83,11 @@ const GestionarMenusPage = () => {
 
     if (!form.precio || parseFloat(form.precio) <= 0 || isNaN(parseFloat(form.precio))) {
       showToast('❌ El precio debe ser mayor a 0', 'warning');
+      return;
+    }
+
+    if (!form.stock || parseInt(form.stock) < 0 || isNaN(parseInt(form.stock))) {
+      showToast('❌ El stock debe ser un número válido mayor o igual a 0', 'warning');
       return;
     }
 
@@ -97,6 +104,7 @@ const GestionarMenusPage = () => {
       formData.append('precio', form.precio);
       formData.append('tipo', form.tipo);
       formData.append('disponible', form.disponible);
+      formData.append('stock', form.stock);
       if (form.imagen instanceof File) {
         formData.append('imagen', form.imagen);
       }
@@ -109,6 +117,19 @@ const GestionarMenusPage = () => {
           },
         });
         showToast('✅ Menú creado correctamente', 'success');
+
+        setForm({
+          nombre: '',
+          descripcion: '',
+          precio: '',
+          tipo: 'desayuno',
+          imagen: null,
+          disponible: true,
+          stock: '',
+        });
+        setPreview(null);
+        setEditandoId(null);
+        setModo('crear');
       } else {
         await api.put(`menus/${editandoId}/`, formData, {
           headers: {
@@ -118,29 +139,47 @@ const GestionarMenusPage = () => {
         });
         showToast('✏️ Menú actualizado correctamente', 'success');
         setModalAbierto(false);
+        setForm({
+          nombre: '',
+          descripcion: '',
+          precio: '',
+          tipo: 'desayuno',
+          imagen: null,
+          disponible: true,
+          stock: '',
+        });
+        setPreview(null);
+        setEditandoId(null);
+        // ❗ NO ponemos setModo('crear') aquí
       }
-
-      setForm({
-        nombre: '',
-        descripcion: '',
-        precio: '',
-        tipo: 'desayuno',
-        imagen: null,
-        disponible: true,
-      });
-      setPreview(null);
-      setEditandoId(null);
-      setModo('crear');
 
       const res = await api.get('menus/');
       setMenus(res.data);
     } catch (err) {
-      console.error('Error creando o editando menú:', err);
-      showToast('❌ Error al guardar el menú', 'error');
+      const data = err.response?.data;
+
+      if (data && typeof data === 'object') {
+        if (data.nombre && Array.isArray(data.nombre)) {
+          showToast(`❌ ${data.nombre[0]}`, 'error');
+        } else {
+          const firstKey = Object.keys(data)[0];
+          const firstError = Array.isArray(data[firstKey]) ? data[firstKey][0] : data[firstKey];
+          showToast(`❌ ${firstError}`, 'error');
+        }
+      } else if (data?.detail) {
+        showToast(`❌ ${data.detail}`, 'error');
+      } else {
+        showToast('❌ Error al guardar el menú', 'error');
+      }
+
+      if (!data?.nombre) {
+        console.error('Error creando o editando menú:', err);
+      }
     } finally {
       setSubiendo(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 text-black">
@@ -165,6 +204,7 @@ const GestionarMenusPage = () => {
             <select name="tipo" value={form.tipo} onChange={handleChange} className="w-full border border-black px-4 py-2 rounded bg-gray-100">
               {tipos.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
             </select>
+            <input type="number" name="stock" value={form.stock} onChange={handleChange} required min="0" step="1" className="w-full border border-black bg-gray-100 px-4 py-2 rounded" placeholder="Stock disponible" />
 
             {!preview && (
               <input
@@ -220,6 +260,7 @@ const GestionarMenusPage = () => {
                   <h3 className="font-bold mt-2">{menu.nombre}</h3>
                   <p className="text-sm text-gray-600">{menu.descripcion}</p>
                   <p className="text-indigo-500 font-semibold">${menu.precio}</p>
+                  <p className="text-sm text-red-700 font-medium mt-1">Stock: {menu.stock}</p>
                 </div>
 
                 <button

@@ -1,5 +1,3 @@
-"use client"
-
 import { HiEye, HiGift } from "react-icons/hi"
 
 const ViewToggle = ({ vista, setVista, ordenes, recompensasCanjeadas }) => {

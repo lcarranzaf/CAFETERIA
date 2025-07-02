@@ -27,8 +27,12 @@ class RecompensaViewSet(viewsets.ModelViewSet):
         user.estrellas -= recompensa.estrellas_requeridas
         user.save()
 
-        # ✅ Registrar el canje
-        RecompensaCanjeada.objects.create(usuario=user, recompensa=recompensa)
+        # ✅ Registrar el canje con estado pendiente
+        RecompensaCanjeada.objects.create(
+            usuario=user,
+            recompensa=recompensa,
+            estado_entrega='pendiente'  # ← aseguramos que comience como pendiente
+        )
 
         return Response(
             {'detail': f'Has canjeado la recompensa: {recompensa.nombre}'},
@@ -45,6 +49,23 @@ class RecompensaViewSet(viewsets.ModelViewSet):
     def historial_todos(self, request):
         canjes = RecompensaCanjeada.objects.select_related('usuario', 'recompensa').order_by('-fecha_canje')
         serializer = RecompensaCanjeadaSerializer(canjes, many=True)
+        return Response(serializer.data)
+
+# NUEVA VIEWSET para editar canjes
+class RecompensaCanjeadaViewSet(viewsets.ModelViewSet):
+    queryset = RecompensaCanjeada.objects.select_related('usuario', 'recompensa').all()
+    serializer_class = RecompensaCanjeadaSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        estado_nuevo = request.data.get('estado_entrega')
+        if estado_nuevo not in ['pendiente', 'entregado']:
+            return Response({'error': 'Estado inválido'}, status=status.HTTP_400_BAD_REQUEST)
+
+        instance.estado_entrega = estado_nuevo
+        instance.save()
+        serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
 @api_view(['GET'])
