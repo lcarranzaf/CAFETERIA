@@ -6,6 +6,8 @@ import Navbar from "../components/Navbar"
 import { FaBoxOpen, FaDollarSign, FaChartBar, FaCalendarAlt } from "react-icons/fa"
 import { Bar } from "react-chartjs-2"
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from "chart.js"
+import { Link } from "react-router-dom"
+import { HiArrowLeft } from "react-icons/hi"
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 
@@ -106,6 +108,7 @@ const ResumenVentas = () => {
               Resumen de Ventas
             </h1>
             <p className="text-gray-600 mt-2">Análisis detallado de tus ventas y productos</p>
+
           </div>
 
           {/* Fechas */}
@@ -138,6 +141,15 @@ const ResumenVentas = () => {
                 />
               </div>
             </div>
+          </div>
+          <div className="w-full lg:w-auto flex justify-end">
+            <Link
+              to="/admin-panel"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <HiArrowLeft className="text-sm" />
+              Volver
+            </Link>
           </div>
         </div>
 

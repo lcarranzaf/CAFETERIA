@@ -29,11 +29,11 @@ export const adminOptionsData = [
     type: "link",
   },
   {
-    id: "recompensas",
+    id: "gestionar-recompensas",
     title: "Recompensas",
     description: "Gestionar las recompensas para los usuarios.",
     iconType: "HiTrophy",
-    link: "/admin-panel/recompensas/nueva",
+    link: "/gestionar-recompensas",
     color: "from-amber-500 to-amber-600",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",

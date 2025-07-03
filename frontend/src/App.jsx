@@ -18,7 +18,7 @@ import Toast from './components/Toast';
 import RecompensasList from './components/rewards/RecompensasList';
 import CrearRecompensa from './components/rewards/CrearRecompensa';
 import HistorialRecompensas from './components/rewards/HistorialRecompensas';
-
+import GestionarRecompensas from './components/rewards/GestionarRecompensas';
 function App() {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -51,6 +51,7 @@ function App() {
           <Route path="/admin-panel/pedidos" element={<AdminPedidosPage />} />
           <Route path="/admin-panel/resumen-ventas" element={<ResumenVentas />} />
           <Route path="/admin-panel/recompensas/nueva" element={<CrearRecompensa />} />
+          <Route path="/gestionar-recompensas" element={<GestionarRecompensas />} />
         </Route>
 
         {/* Catch all */}

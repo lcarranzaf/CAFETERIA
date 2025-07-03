@@ -1,4 +1,3 @@
-# orders/views.py
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +8,7 @@ from math import floor
 from menus.models import Menu
 from django.db.models import Sum
 from django.db import models
+from utils.twilio import enviar_whatsapp  # ✔️ Twilio importado
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -31,7 +31,12 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Order.objects.none()
 
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        pedido = serializer.save(usuario=self.request.user)
+
+        # 📲 Notificar al admin (reemplaza con número real del admin)
+        numero_admin = "+593997811592"
+        mensaje = f"Nuevo pedido de {self.request.user.first_name, self.request.user.last_name} el usuario: ({self.request.user.username}). Total: ${pedido.total:.2f}. Numero de pedido: {pedido.id}"
+        enviar_whatsapp(numero_admin, mensaje)
 
     def destroy(self, request, *args, **kwargs):
         order = self.get_object()
@@ -55,6 +60,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             user.save()
             order.pago_verificado = True
             order.save()
+
+            # 📲 Notificar al cliente por WhatsApp
+            numero_cliente = user.telefono
+            mensaje = "Tu pedido fue confirmado y el pago verificado ✅"
+            enviar_whatsapp(numero_cliente, mensaje)
 
         return response
 
@@ -93,6 +103,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             user.save()
             order.pago_verificado = True
             order.save()
+
+            # 📲 Notificar al cliente por WhatsApp
+            numero_cliente = user.telefono
+            mensaje = "Tu pedido fue confirmado y el pago verificado ✅"
+            enviar_whatsapp(numero_cliente, mensaje)
 
         return response
 
@@ -134,7 +149,22 @@ class OrderViewSet(viewsets.ModelViewSet):
                 user.save()
                 order.pago_verificado = True
 
+                # ✅ Notificar por verificación de pago
+                numero_cliente = user.telefono
+                mensaje = "Tu pedido fue confirmado y el pago verificado ✅"
+                enviar_whatsapp(numero_cliente, mensaje)
+
             order.estado_pago = estado_pago
+
+        if estado_reserva == "entregado":
+            numero_cliente = order.usuario.telefono
+            mensaje = "Tu pedido ha sido entregado 🍽️"
+            enviar_whatsapp(numero_cliente, mensaje)
+
+        if estado_pago == "rechazado" or estado_reserva == "rechazado":
+            numero_cliente = order.usuario.telefono
+            mensaje = "Tu pedido fue rechazado ❌. Revisa el comprobante y vuelve hacer otro pedido"
+            enviar_whatsapp(numero_cliente, mensaje)
 
         order.save()
         serializer = self.get_serializer(order)

@@ -1,37 +1,53 @@
 import React, { useState } from 'react';
 import { crearRecompensa } from '../../services/recompensasService';
+import { Link } from 'react-router-dom';
 import Navbar from '../Navbar';
+import { HiArrowLeft } from 'react-icons/hi';
 
 const CrearRecompensa = () => {
-  const [form, setForm] = useState({ nombre: '', descripcion: '', estrellas_requeridas: '' });
+  const [form, setForm] = useState({
+    nombre: '',
+    descripcion: '',
+    estrellas_requeridas: '',
+  });
   const [mensaje, setMensaje] = useState('');
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validación simple
+    if (!form.nombre || !form.descripcion || !form.estrellas_requeridas) {
+      setMensaje('❌ Por favor, completa todos los campos.');
+      return;
+    }
+
     try {
       const token = JSON.parse(localStorage.getItem('authTokens'))?.access;
       await crearRecompensa(form, token);
-      setMensaje('✅ Recompensa creada exitosamente');
+      setMensaje('✅ Recompensa creada exitosamente.');
       setForm({ nombre: '', descripcion: '', estrellas_requeridas: '' });
     } catch (err) {
-      setMensaje('❌ Error al crear la recompensa');
+      setMensaje('❌ Error al crear la recompensa.');
     }
   };
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-lg">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+      <div className="min-h-screen bg-gray-50 px-4 py-8">
+        <div className="max-w-xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+          
+
+          <h2 className="text-2xl mt-4 font-bold text-gray-800 mb-6 text-center">
             Crear nueva recompensa 🎁
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="nombre" className="block text-sm font-bold text-gray-700 mb-1">
                 Nombre de la recompensa
               </label>
               <input
@@ -39,12 +55,12 @@ const CrearRecompensa = () => {
                 value={form.nombre}
                 onChange={handleChange}
                 placeholder="Ej: Bebida gratis"
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border bg-gray-50 border-gray-900 rounded-xl px-4 py-2 focus:outline-none text-black focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="descripcion" className="block text-sm font-bold text-gray-700 mb-1">
                 Descripción
               </label>
               <textarea
@@ -52,12 +68,12 @@ const CrearRecompensa = () => {
                 value={form.descripcion}
                 onChange={handleChange}
                 placeholder="Ej: Canjea una bebida gratis con esta recompensa"
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border bg-gray-50 border-gray-900 rounded-xl px-4 py-2 h-24 resize-none focus:outline-none text-black  focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label htmlFor="estrellas_requeridas" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="estrellas_requeridas" className="block text-sm font-bold text-gray-700 mb-1">
                 Estrellas requeridas
               </label>
               <input
@@ -67,7 +83,7 @@ const CrearRecompensa = () => {
                 value={form.estrellas_requeridas}
                 onChange={handleChange}
                 placeholder="Ej: 30"
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border bg-gray-50 border-gray-900 rounded-xl px-4 py-2 focus:outline-none text-black  focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -77,15 +93,23 @@ const CrearRecompensa = () => {
             >
               Crear Recompensa
             </button>
+            <div className="mb-4">
+              <Link
+                to="/gestionar-recompensas"
+                className="w-full inline-block border border-gray-900 text-center mt-2 bg-gray-300 hover:bg-blue-400 text-black py-2 rounded-lg font-bold transition"
+              >
+                Volver al panel administrador
+              </Link>
+            </div>
 
             {mensaje && (
-              <p
-                className={`text-center font-medium ${
-                  mensaje.includes('✅') ? 'text-green-600' : 'text-red-500'
+              <div
+                className={`text-center text-sm font-medium rounded-xl py-2 px-4 mt-2 ${
+                  mensaje.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
                 }`}
               >
                 {mensaje}
-              </p>
+              </div>
             )}
           </form>
         </div>

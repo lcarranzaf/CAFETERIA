@@ -6,6 +6,7 @@ class Recompensa(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
     estrellas_requeridas = models.PositiveIntegerField()
+    activo = models.BooleanField(default=True) 
 
     def __str__(self):
         return self.nombre

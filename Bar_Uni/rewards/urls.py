@@ -7,6 +7,7 @@ router.register(r'recompensas', RecompensaViewSet, basename='recompensa')
 router.register(r'recompensas-canjeadas', RecompensaCanjeadaViewSet, basename='recompensa-canjeada')
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('recompensas/usuario/<int:usuario_id>/', recompensas_por_usuario, name='recompensas-por-usuario'),
+    
+    path('', include(router.urls)),
 ]
