@@ -19,6 +19,8 @@ import RecompensasList from './components/rewards/RecompensasList';
 import CrearRecompensa from './components/rewards/CrearRecompensa';
 import HistorialRecompensas from './components/rewards/HistorialRecompensas';
 import GestionarRecompensas from './components/rewards/GestionarRecompensas';
+import NotificacionesPage from "./pages/NotificacionesPage"
+
 function App() {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -40,6 +42,7 @@ function App() {
           <Route path="/reservas" element={<ReservaPage />} />
           <Route path="/recompensas" element={<RecompensasList />} />
           <Route path="/historial-recompensas" element={<HistorialRecompensas />} />
+          <Route path="/notificaciones" element={<NotificacionesPage />} />
         </Route>
 
         {/* Rutas solo para administradores */}

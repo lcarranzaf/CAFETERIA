@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'reviews',
     'rewards',
     'chatbot',
+    'notificaciones',
 ]
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
