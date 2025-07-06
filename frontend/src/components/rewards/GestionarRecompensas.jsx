@@ -6,7 +6,7 @@ import {
   actualizarRecompensa,
   cambiarEstadoRecompensa,
 } from "../../services/recompensasService";
-import Navbar from "../Navbar";
+import Navbar from "../layout/Navbar";
 import { HiPlus, HiTrash, HiPencil } from "react-icons/hi2";
 import { MdVisibilityOff, MdVisibility } from 'react-icons/md';
 
@@ -38,7 +38,7 @@ const GestionarRecompensas = () => {
 
   const toggleEstado = async (recompensa) => {
     try {
-      await cambiarEstadoRecompensa(recompensa.id, token); 
+      await cambiarEstadoRecompensa(recompensa.id, !recompensa.activo, token);
       cargarRecompensas();
     } catch (error) {
       console.error("Error al cambiar el estado:", error);
@@ -59,7 +59,7 @@ const GestionarRecompensas = () => {
   return (
     <>
       <Navbar />
-      <div className="px-6 py-8 max-w-4xl mx-auto">
+      <div className=" px-6 py-8 max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Gestión de Recompensas</h2>
           <Link

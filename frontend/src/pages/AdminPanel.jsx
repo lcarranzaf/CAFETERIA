@@ -2,7 +2,7 @@
 
 import { useContext, useState } from "react"
 import { AuthContext } from "../context/AuthContext"
-import Navbar from "../components/Navbar"
+import Navbar from "../components/layout/Navbar"
 import ChatbotAdmin from "../components/chatbot/ChatbotAdmin"
 import Modal from "../components/Modal"
 import AdminCard from "../components/panels/AdminCard"

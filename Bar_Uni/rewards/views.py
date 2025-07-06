@@ -5,6 +5,7 @@ from .models import Recompensa, RecompensaCanjeada
 from .serializers import RecompensaSerializer, RecompensaCanjeadaSerializer
 
 class RecompensaViewSet(viewsets.ModelViewSet):
+    queryset = Recompensa.objects.all() 
     serializer_class = RecompensaSerializer
 
     def get_permissions(self):
@@ -19,7 +20,11 @@ class RecompensaViewSet(viewsets.ModelViewSet):
             return Recompensa.objects.all()
         return Recompensa.objects.filter(activo=True)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def get_object(self):
+        """Permite acceder a recompensas aunque estén inactivas."""
+        return Recompensa.objects.get(pk=self.kwargs["pk"])
+
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAdminUser])
     def toggle_estado(self, request, pk=None):
         recompensa = self.get_object()
         recompensa.activo = not recompensa.activo
@@ -60,6 +65,7 @@ class RecompensaViewSet(viewsets.ModelViewSet):
         canjes = RecompensaCanjeada.objects.select_related('usuario', 'recompensa').order_by('-fecha_canje')
         serializer = RecompensaCanjeadaSerializer(canjes, many=True)
         return Response(serializer.data)
+
 
 
 class RecompensaCanjeadaViewSet(viewsets.ModelViewSet):

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/Navbar';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import EditarMenuModal from '../components/EditarMenuModal';

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { obtenerHistorialCanjes } from '../../services/recompensasService';
 import { useAuth } from '../../context/AuthContext';
-import Navbar from '../Navbar';
+import Navbar from '../layout/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 const HistorialRecompensas = () => {

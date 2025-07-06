@@ -76,10 +76,10 @@ export const obtenerRecompensasPorUsuario = async (usuarioId, token) => {
   });
   return res.data;
 };
-export const cambiarEstadoRecompensa = async (id, token) => {
-  const res = await axios.post(
-    `${API}/recompensas/${id}/toggle_estado/`,
-    {},
+export const cambiarEstadoRecompensa = async (id, nuevoEstado, token) => {
+  const res = await axios.patch(
+    `${API}/recompensas/${id}/`,
+    { activo: nuevoEstado },
     {
       headers: {
         Authorization: `Bearer ${token}`,

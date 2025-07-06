@@ -2,7 +2,7 @@
 
 import { useContext, useState } from "react"
 import { Link } from "react-router-dom"
-import Navbar from "../components/Navbar"
+import Navbar from "../components/layout/Navbar"
 import { OrderContext } from "../context/OrderContext"
 import api from "../services/api"
 import ImagenQR from "../components/ImagenQQR"

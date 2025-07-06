@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
-import MenuCard from '../components/MenuCard';
+import Navbar from '../components/layout/Navbar';
 import HeroSection from '../components/HeroSection';
 import api from '../services/api';
 import MenuCarousel from '../components/MenuCarousel';

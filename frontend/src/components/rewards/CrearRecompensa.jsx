@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { crearRecompensa } from '../../services/recompensasService';
 import { Link } from 'react-router-dom';
-import Navbar from '../Navbar';
+import Navbar from '../layout/Navbar';
 import { HiArrowLeft } from 'react-icons/hi';
 
 const CrearRecompensa = () => {

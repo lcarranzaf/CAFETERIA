@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import Navbar from "../components/Navbar"
+import Navbar from "../components/layout/Navbar"
 import api from "../services/api"
 import { HiOutlineCalendar } from "react-icons/hi"
 import ImagenQR from "../components/ImagenQQR"
@@ -152,7 +152,7 @@ const ReservaPage = () => {
               <div className="space-y-6">
                 {/* Estado de Reserva */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">📦</span>
                     Estado de Reserva
                   </label>
@@ -171,7 +171,7 @@ const ReservaPage = () => {
 
                 {/* Estado de Pago */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">💳</span>
                     Estado de Pago
                   </label>
@@ -189,7 +189,7 @@ const ReservaPage = () => {
 
                 {/* Rango de Fechas */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3  items-center gap-2">
                     <span className="text-lg">📅</span>
                     Rango de Fechas
                   </label>

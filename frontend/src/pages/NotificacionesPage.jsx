@@ -2,7 +2,7 @@ import { useEffect, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import useNotificaciones from "../hooks/useNotificaciones"
 import { AuthContext } from "../context/AuthContext"
-import Navbar from "../components/Navbar"
+import Navbar from "../components/layout/Navbar"
 import { CheckCircle, XCircle, AlertTriangle, ShoppingCart } from "lucide-react"
 
 const NotificacionesPage = () => {

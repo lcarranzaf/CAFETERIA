@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/Navbar';
 import MenuCard from '../components/MenuCard';
 import MenuReviewForm from '../components/MenuReviewForm'; 
 import api from '../services/api';

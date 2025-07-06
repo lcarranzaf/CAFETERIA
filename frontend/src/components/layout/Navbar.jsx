@@ -3,10 +3,10 @@
 import { useContext, useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { HiOutlineMenu, HiOutlineShoppingCart, HiX, HiBell } from "react-icons/hi"
-import { AuthContext } from "../context/AuthContext"
-import { OrderContext } from "../context/OrderContext"
-import PedidoModal from "./PedidoModal"
-import useNotificaciones from "../hooks/useNotificaciones"
+import { AuthContext } from "../../context/AuthContext"
+import { OrderContext } from "../../context/OrderContext"
+import PedidoModal from "../PedidoModal"
+import useNotificaciones from "../../hooks/useNotificaciones"
 
 const Navbar = () => {
   const { user, logoutUser } = useContext(AuthContext)

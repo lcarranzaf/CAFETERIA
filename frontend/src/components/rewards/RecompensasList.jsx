@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { obtenerRecompensas, canjearRecompensa } from '../../services/recompensasService';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
-import Navbar from '../Navbar';
+import Navbar from '../layout/Navbar';
 
 const RecompensasList = () => {
   const [recompensas, setRecompensas] = useState([]);
