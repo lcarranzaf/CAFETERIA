@@ -54,13 +54,10 @@ const PedidoPage = () => {
       setIsLoading(false)
     }
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Navbar />
-
       <section className="py-10 px-4 md:px-20">
-        {/* Header mejorado */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="p-3 bg-emerald-100 rounded-xl">

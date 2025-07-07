@@ -47,7 +47,7 @@ const CrearRecompensa = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="nombre" className="block text-sm font-bold text-gray-700 mb-1">
+              <label htmlFor="nombre" className="block text-xl font-bold text-gray-700 mb-1">
                 Nombre de la recompensa
               </label>
               <input
@@ -60,7 +60,7 @@ const CrearRecompensa = () => {
             </div>
 
             <div>
-              <label htmlFor="descripcion" className="block text-sm font-bold text-gray-700 mb-1">
+              <label htmlFor="descripcion" className="block text-xl font-bold text-gray-700 mb-1">
                 Descripción
               </label>
               <textarea
@@ -73,7 +73,7 @@ const CrearRecompensa = () => {
             </div>
 
             <div>
-              <label htmlFor="estrellas_requeridas" className="block text-sm font-bold text-gray-700 mb-1">
+              <label htmlFor="estrellas_requeridas" className="block text-xl font-bold text-gray-700 mb-1">
                 Estrellas requeridas
               </label>
               <input
@@ -96,9 +96,9 @@ const CrearRecompensa = () => {
             <div className="mb-4">
               <Link
                 to="/gestionar-recompensas"
-                className="w-full inline-block border border-gray-900 text-center mt-2 bg-gray-300 hover:bg-blue-400 text-black py-2 rounded-lg font-bold transition"
+                className="w-full inline-block border border-gray-900 text-center mt-2 bg-gray-300 hover:bg-blue-200 text-black py-2 rounded-lg font-bold transition"
               >
-                Volver al panel administrador
+                Volver a gestionar recompensas
               </Link>
             </div>
 

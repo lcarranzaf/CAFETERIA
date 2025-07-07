@@ -5,6 +5,7 @@ import Navbar from "../components/layout/Navbar"
 import api from "../services/api"
 import { HiOutlineCalendar } from "react-icons/hi"
 import ImagenQR from "../components/ImagenQQR"
+import Toast from "../components/Toast" // ✅ IMPORTACIÓN DEL TOAST
 
 const ReservaPage = () => {
   const [ordenes, setOrdenes] = useState([])
@@ -17,6 +18,11 @@ const ReservaPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const dateDesdeRef = useRef(null)
   const dateHastaRef = useRef(null)
+  const [previewUrls, setPreviewUrls] = useState({})
+
+  const [toastVisible, setToastVisible] = useState(false)
+  const [toastMessage, setToastMessage] = useState("")
+  const [toastType, setToastType] = useState("success")
 
   useEffect(() => {
     api
@@ -47,9 +53,15 @@ const ReservaPage = () => {
     setOrdenes((prev) => prev.map((orden) => (orden.id === id ? { ...orden, metodo_pago: e.target.value } : orden)))
   }
 
+  // ✅ ACTUALIZACIÓN CON TOAST EN VEZ DE ALERT
   const handleComprobanteUpload = async (orden) => {
     const file = comprobantes[orden.id]
-    if (!file || !orden.metodo_pago) return alert("Selecciona método de pago y archivo")
+    if (!file || !orden.metodo_pago) {
+      setToastMessage("Selecciona método de pago y archivo")
+      setToastType("warning")
+      setToastVisible(true)
+      return
+    }
 
     const formData = new FormData()
     formData.append("metodo_pago", orden.metodo_pago)
@@ -61,10 +73,14 @@ const ReservaPage = () => {
       await api.patch(`orders/${orden.id}/upload_comprobante/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      alert("✅ Comprobante subido con éxito")
-      window.location.reload()
+      setToastMessage("✅ Comprobante subido con éxito")
+      setToastType("success")
+      setToastVisible(true)
+      setTimeout(() => window.location.reload(), 2000)
     } catch (error) {
-      alert("❌ Error al subir comprobante")
+      setToastMessage("❌ Error al subir comprobante")
+      setToastType("error")
+      setToastVisible(true)
     } finally {
       setIsLoading((prev) => ({ ...prev, [orden.id]: false }))
     }
@@ -96,12 +112,9 @@ const ReservaPage = () => {
     .filter((orden) => {
       const coincideEstadoReserva = estadoReserva ? orden.estado_reserva === estadoReserva : true
       const coincideEstadoPago = estadoPago ? orden.estado_pago === estadoPago : true
-
-      // Filtro de rango de fechas
       const fechaOrden = new Date(orden.fecha_orden).toLocaleDateString("en-CA")
       const coincideFechaDesde = fechaDesde ? fechaOrden >= fechaDesde : true
       const coincideFechaHasta = fechaHasta ? fechaOrden <= fechaHasta : true
-
       return coincideEstadoReserva && coincideEstadoPago && coincideFechaDesde && coincideFechaHasta
     })
     .sort((a, b) => new Date(b.fecha_orden) - new Date(a.fecha_orden))
@@ -118,14 +131,12 @@ const ReservaPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Navbar />
-
       <div className="flex pt-4">
         {/* Sidebar de Filtros */}
         <div
           className={`${sidebarCollapsed ? "w-16" : "w-80"} transition-all duration-300 bg-white shadow-xl border-r border-slate-200 min-h-[calc(100vh-80px)] sticky top-20`}
         >
           <div className="p-6">
-            {/* Header del Sidebar */}
             <div className="flex items-center justify-between mb-6">
               {!sidebarCollapsed && (
                 <div className="flex items-center gap-3">
@@ -150,7 +161,6 @@ const ReservaPage = () => {
 
             {!sidebarCollapsed && (
               <div className="space-y-6">
-                {/* Estado de Reserva */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">📦</span>
@@ -168,8 +178,6 @@ const ReservaPage = () => {
                     <option value="entregado">Entregado</option>
                   </select>
                 </div>
-
-                {/* Estado de Pago */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">💳</span>
@@ -186,8 +194,6 @@ const ReservaPage = () => {
                     <option value="rechazado">Rechazado</option>
                   </select>
                 </div>
-
-                {/* Rango de Fechas */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-3  items-center gap-2">
                     <span className="text-lg">📅</span>
@@ -240,8 +246,6 @@ const ReservaPage = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Botón Limpiar Filtros */}
                 <button
                   onClick={limpiarFiltros}
                   className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"
@@ -261,21 +265,16 @@ const ReservaPage = () => {
             )}
           </div>
         </div>
-
-        {/* Contenido Principal */}
         <div className="flex-1 p-6">
-          {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="p-3 bg-blue-100 rounded-xl">
                 <span className="text-3xl">🧾</span>
               </div>
-              <h2 className="text-4xl font-bold text-slate-800">Tus Pedidos</h2>
+              <h2 className="text-2xl font-bold text-slate-800">Tus Pedidos</h2>
             </div>
-            <p className="text-slate-600">Gestiona y revisa el estado de todos tus pedidos</p>
+            
           </div>
-
-          {/* Lista de órdenes */}
           {ordenesFiltradas.length === 0 ? (
             <div className="text-center py-16">
               <div className="p-6 bg-slate-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
@@ -291,7 +290,6 @@ const ReservaPage = () => {
                   key={orden.id}
                   className="bg-white border border-slate-200 shadow-lg rounded-xl p-6 hover:shadow-xl transition-all duration-200"
                 >
-                  {/* Header de la orden */}
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-200">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-100 rounded-lg">
@@ -306,8 +304,6 @@ const ReservaPage = () => {
                       <p className="text-2xl font-bold text-emerald-600">${Number(orden.total).toFixed(2)}</p>
                     </div>
                   </div>
-
-                  {/* Estados */}
                   <div className="flex flex-wrap gap-3 mb-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(
@@ -326,8 +322,6 @@ const ReservaPage = () => {
                       Pago: {orden.estado_pago}
                     </span>
                   </div>
-
-                  {/* Items del pedido */}
                   {orden.items && orden.items.length > 0 && (
                     <div className="bg-slate-50 rounded-lg p-4 mb-4">
                       <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
@@ -346,11 +340,8 @@ const ReservaPage = () => {
                       </ul>
                     </div>
                   )}
-
-                  {/* Sección de pago */}
                   {orden.estado_pago === "pendiente" && !orden.comprobante_pago && (
                     <div className="space-y-4 mt-6 pt-4 border-t border-slate-200">
-                      {/* Payment Method Selection */}
                       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-3">
                           <span className="text-lg">💳</span>
@@ -365,11 +356,8 @@ const ReservaPage = () => {
                           <option value="DEUNA">DEUNA</option>
                         </select>
                       </div>
-
-                      {/* DEUNA Payment Info + File Upload */}
                       {orden.metodo_pago === "DEUNA" && (
                         <>
-                          {/* DEUNA Info */}
                           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                             <div className="text-center space-y-3">
                               <div className="flex items-center justify-center gap-2 mb-2">
@@ -390,8 +378,6 @@ const ReservaPage = () => {
                               </div>
                             </div>
                           </div>
-
-                          {/* File Upload */}
                           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                             <div className="flex items-center gap-2 mb-3">
                               <span className="text-lg">📄</span>
@@ -402,12 +388,11 @@ const ReservaPage = () => {
                                 <input
                                   type="file"
                                   accept="image/*"
-                                  onChange={(e) =>
-                                    setComprobantes((prev) => ({
-                                      ...prev,
-                                      [orden.id]: e.target.files[0],
-                                    }))
-                                  }
+                                  onChange={(e) => {
+                                    const file = e.target.files[0]
+                                    setComprobantes((prev) => ({ ...prev, [orden.id]: file }))
+                                    setPreviewUrls((prev) => ({ ...prev, [orden.id]: URL.createObjectURL(file) }))
+                                  }}
                                   className="w-full p-3 border-2 border-dashed border-slate-300 rounded-lg bg-white hover:border-slate-400 transition-colors duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
                                 />
                               </label>
@@ -415,6 +400,15 @@ const ReservaPage = () => {
                                 <div className="flex items-center gap-2 text-sm text-slate-600">
                                   <span>📎</span>
                                   <span>{comprobantes[orden.id]?.name}</span>
+                                </div>
+                              )}
+                              {previewUrls[orden.id] && (
+                                <div className="mt-2">
+                                  <img
+                                    src={previewUrls[orden.id]}
+                                    alt="Vista previa del comprobante"
+                                    className="w-48 rounded-lg border border-slate-300 shadow-md"
+                                  />
                                 </div>
                               )}
                               {comprobantes[orden.id] && (
@@ -442,14 +436,18 @@ const ReservaPage = () => {
                       )}
                     </div>
                   )}
-
-                  {/* Comprobante subido */}
                   {orden.comprobante_pago && (
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">✅</span>
                         <p className="text-green-800 font-semibold">Comprobante subido correctamente</p>
                       </div>
+                      <img
+                        src={orden.comprobante_pago}
+                        alt="Comprobante subido"
+                        className="w-48 rounded-lg border border-green-300 shadow-md"
+                      />
+
                     </div>
                   )}
                 </div>
@@ -458,6 +456,9 @@ const ReservaPage = () => {
           )}
         </div>
       </div>
+      
+      
+      <Toast message={toastMessage} show={toastVisible} type={toastType} />
     </div>
   )
 }
