@@ -77,7 +77,7 @@ const PedidoCard = ({
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-800">Pedido #{orden.id}</h3>
-                <p className="text-sm text-slate-600 font-semibold">
+                <p className="text-xl capitalize text-slate-600 font-semibold">
                   {orden.usuario?.first_name} {orden.usuario?.last_name}
                 </p>
               </div>
@@ -119,13 +119,13 @@ const PedidoCard = ({
                 {orden.items.map((item, i) => (
                   <div
                     key={i}
-                    className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-slate-200"
+                    className="flex  justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-slate-200"
                   >
                     <div>
-                      <span className="text-sm text-slate-700 font-semibold">
+                      <span className="text-xl  text-slate-700 font-semibold">
                         {item.menu_nombre} <span className="text-blue-600 font-bold">x {item.cantidad}</span>
                       </span>
-                      <p className="text-xs text-gray-500">Stock actual: {item.menu_stock}</p>
+                      <p className="text-xl text-gray-500">Stock actual: {item.menu_stock}</p>
                     </div>
                     <span className="font-bold text-emerald-600">${item.subtotal}</span>
                   </div>

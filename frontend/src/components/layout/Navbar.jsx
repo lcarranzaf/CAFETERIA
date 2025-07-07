@@ -58,7 +58,7 @@ const Navbar = () => {
             <h1 className="text-lg font-bold">BYTEBAR</h1>
           </div>
 
-          <ul className="hidden md:flex space-x-6 font-medium">
+          <ul className="hidden md:flex space-x-6 text-xl font-medium">
             <li><Link to="/home">Inicio</Link></li>
             <li><Link to="/menu">Menú</Link></li>
             {user && <li><Link to="/reservas">Reservas</Link></li>}
@@ -91,15 +91,18 @@ const Navbar = () => {
           )}
           {user ? (
             <>
-              <div className="flex items-center gap-2 text-black px-3 py-1 rounded-full">
+              <Link
+                to="/perfil"
+                className="flex items-center gap-2 text-black px-3 py-1 border border-gray-500 rounded-full hover:bg-gray-200 transition"
+              >
                 <span className="text-yellow-500 text-lg">👤</span>
                 <span className="text-sm font-medium capitalize">
                   {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}
                 </span>
-              </div>
+              </Link>
               <button
                 onClick={logoutUser}
-                className="!bg-red-100 !text-red-600 !border-red-200 px-2 py-1 rounded hover:!bg-red-200 text-xs border transition-colors"
+                className="!bg-red-100 !text-red-600 !border-red-200 px-2 py-1 rounded hover:!bg-red-200 text-sm border transition-colors"
                 style={{ backgroundColor: "#fef2f2", color: "#dc2626", borderColor: "#fecaca" }}
               >
                 Cerrar sesión
@@ -148,19 +151,23 @@ const Navbar = () => {
                 <img src="/Logo.png" alt="Logo" className="h-8" />
                 <h2 className="text-lg font-bold">BYTEBAR</h2>
               </div>
-              <button onClick={closeMenu} className="p-2 bg-amber-100 hover:bg-gray-100 rounded-full">
+              <button onClick={closeMenu} className="p-2 bg-amber-100 text-black hover:bg-gray-100 rounded-full">
                 <HiX size={20} />
               </button>
             </div>
 
             {user && (
               <div className="p-6 border-b">
-                <div className="flex items-center gap-2 text-black px-3 py-2 bg-gray-50 rounded-lg">
+                <Link
+                  to="/perfil"
+                  onClick={closeMenu}
+                  className="flex items-center border border-black gap-2 text-black px-3 py-2 bg-gray-50 rounded-full hover:bg-gray-400 transition-colors"
+                >
                   <span className="text-yellow-500 text-lg">👤</span>
                   <span className="text-sm font-medium capitalize">
                     {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}
                   </span>
-                </div>
+                </Link>
               </div>
             )}
 
@@ -170,7 +177,7 @@ const Navbar = () => {
                 <Link to="/menu" onClick={closeMenu} className="text-lg font-medium hover:text-indigo-600 hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg">Menú</Link>
                 {user && <Link to="/reservas" onClick={closeMenu} className="text-lg font-medium hover:text-indigo-600 hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg">Reservas</Link>}
                 <Link to="/recompensas" onClick={closeMenu} className="text-lg font-medium hover:text-indigo-600 hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg">Recompensas</Link>
-                {user && <button onClick={() => { closeMenu(); handleIrNotificaciones(); }} className="text-left text-lg bg-white font-medium text-indigo-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg w-full">Notificaciones 🔔 {notificacionesNoLeidas > 0 && `(${notificacionesNoLeidas})`}</button>}
+                {user && <button onClick={() => { closeMenu(); handleIrNotificaciones(); }} className="text-left text-lg bg-white font-medium text-indigo-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg w-full">Notificaciones 🔔 {nuevas > 0 && `(${nuevas})`}</button>}
                 {user?.is_staff && (
                   <>
                     <Link to="/gestionar-menus" onClick={closeMenu} className="text-lg font-medium hover:text-indigo-600 hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg">Gestionar Menú</Link>

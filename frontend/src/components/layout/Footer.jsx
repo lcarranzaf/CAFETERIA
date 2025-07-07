@@ -1,4 +1,4 @@
-import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaWhatsapp, FaGithub } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -15,23 +15,24 @@ const Footer = () => {
         {/* Contacto */}
         <div>
           <h2 className="text-xl font-bold mb-3">Contáctanos</h2>
-          <p className="text-sm">📍 Campus Universitario, Edificio C</p>
-          <p className="text-sm">📞 +593 987 654 321</p>
-          <p className="text-sm">✉️ contacto@cafeteriauni.edu.ec</p>
+          <p className="text-sm">📍 Campus Universitario, Polideportivo</p>
+          <p className="text-sm">✉️ lcarranzaf@unemi.edu.ec</p>
+          <p className="text-sm">✉️ aolverab2@unemi.edu.ec</p>
         </div>
-
-        {/* Redes sociales */}
         <div>
           <h2 className="text-xl font-bold mb-3">Síguenos</h2>
-          <div className="flex items-center gap-4 mt-2">
-            <a href="#" className="hover:text-blue-400 text-lg">
-              <FaFacebookF />
+
+          <div className="flex items-center gap-2 mt-2">
+            <FaGithub className="text-lg" />
+            <a href="https://github.com/lcarranzaf" className="hover:text-blue-400 text-sm font-medium" target="_blank" rel="noopener noreferrer">
+              Luis Carranza
             </a>
-            <a href="#" className="hover:text-pink-400 text-lg">
-              <FaInstagram />
-            </a>
-            <a href="#" className="hover:text-green-400 text-lg">
-              <FaWhatsapp />
+          </div>
+
+          <div className="flex items-center gap-2 mt-2">
+            <FaGithub className="text-lg" />
+            <a href="https://github.com/anadiaolvera" className="hover:text-blue-400 text-sm font-medium" target="_blank" rel="noopener noreferrer">
+              Anadia Olvera
             </a>
           </div>
         </div>

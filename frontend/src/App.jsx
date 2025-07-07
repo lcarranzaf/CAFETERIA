@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation
+} from 'react-router-dom';
+
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
-import Home from './pages/Home'; 
+import Home from './pages/Home';
 import MenuPage from './pages/MenuPage';
 import PedidoPage from './pages/PedidoPage';
 import ReservaPage from './pages/ReservaPage';
@@ -11,16 +18,17 @@ import GestionarMenusPage from './pages/GestionarMenusPage';
 import AdminPanel from './pages/AdminPanel';
 import CrearAdminPage from './pages/CrearAdminPage';
 import PrivateRoute from './components/PrivateRoute';
-import AdminRoute from './components/AdminRoute'; 
+import AdminRoute from './components/AdminRoute';
 import AdminPedidosPage from './pages/AdminPedidosPage';
 import ResumenVentas from './pages/ResumenVentas';
-import Toast from './components/Toast'; 
+import Toast from './components/Toast';
 import RecompensasList from './components/rewards/RecompensasList';
 import CrearRecompensa from './components/rewards/CrearRecompensa';
 import HistorialRecompensas from './components/rewards/HistorialRecompensas';
 import GestionarRecompensas from './components/rewards/GestionarRecompensas';
-import NotificacionesPage from "./pages/NotificacionesPage"
+import NotificacionesPage from './pages/NotificacionesPage';
 import Footer from './components/layout/Footer';
+import PerfilPage from './pages/PerfilPage';
 
 function AppContent() {
   const [toastVisible, setToastVisible] = useState(false);
@@ -31,7 +39,7 @@ function AppContent() {
   const hideFooterRoutes = ['/login', '/register'];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100">
+    <div className="flex flex-col min-h-screen bg-slate-100">
       <main className="flex-grow">
         <Routes>
           {/* Rutas públicas */}
@@ -48,6 +56,7 @@ function AppContent() {
             <Route path="/recompensas" element={<RecompensasList />} />
             <Route path="/historial-recompensas" element={<HistorialRecompensas />} />
             <Route path="/notificaciones" element={<NotificacionesPage />} />
+            <Route path="/perfil" element={<PerfilPage />} />
           </Route>
 
           {/* Rutas solo para administradores */}
@@ -67,7 +76,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      {/* Ocultar Footer en login y register */}
+      {/* Footer oculto en login y register */}
       {!hideFooterRoutes.includes(location.pathname) && <Footer />}
 
       <Toast message={toastMessage} show={toastVisible} type={toastType} />
