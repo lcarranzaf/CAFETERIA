@@ -13,7 +13,6 @@ export const OrderProvider = ({ children }) => {
 
   const { authTokens, user } = useContext(AuthContext);
 
-  // ✅ Limpiar carrito cuando el usuario cierre sesión (evento personalizado)
   useEffect(() => {
     const handleLogout = () => {
       setPedido([]);
@@ -24,22 +23,28 @@ export const OrderProvider = ({ children }) => {
     return () => window.removeEventListener('logout', handleLogout);
   }, []);
 
-  // ✅ Guardar carrito en localStorage cada vez que cambie y haya sesión
   useEffect(() => {
     if (user) {
       localStorage.setItem('pedido', JSON.stringify(pedido));
     }
   }, [pedido, user]);
 
-  // ✅ Agregar item al pedido
   const agregarAlPedido = (item) => {
     const index = pedido.findIndex(i => i.id === item.id);
     if (index !== -1) {
       const actualizado = [...pedido];
-      actualizado[index].cantidad += 1;
-      setPedido(actualizado);
+      if (actualizado[index].cantidad < actualizado[index].stock) {
+        actualizado[index].cantidad += 1;
+        setPedido(actualizado);
+      }
     } else {
-      setPedido([...pedido, { ...item, cantidad: 1 }]);
+      setPedido([...pedido, {
+        id: item.id,
+        nombre: item.nombre,
+        precio: item.precio,
+        stock: item.stock, // 👈 Nos aseguramos de incluir el stock
+        cantidad: 1,
+      }]);
     }
   };
 
@@ -48,13 +53,11 @@ export const OrderProvider = ({ children }) => {
     localStorage.removeItem('pedido');
   };
 
-  // ✅ Eliminar item del pedido
   const eliminarDelPedido = (id) => {
     const actualizado = pedido.filter(item => item.id !== id);
     setPedido(actualizado);
   };
 
-  // ✅ Actualizar cantidad (y eliminar si queda en 0)
   const actualizarCantidadPedido = (id, nuevaCantidad) => {
     if (nuevaCantidad < 1) {
       eliminarDelPedido(id);
@@ -67,7 +70,6 @@ export const OrderProvider = ({ children }) => {
     setPedido(actualizado);
   };
 
-  // ✅ Confirmar pedido y limpiar carrito
   const confirmarPedido = async () => {
     try {
       const items = pedido.map(item => ({

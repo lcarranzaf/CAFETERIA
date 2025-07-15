@@ -1,17 +1,24 @@
-# orders/serializers.py
 from rest_framework import serializers
 from .models import Order, OrderItem
 from menus.models import Menu
-from users.serializers import UsuarioSimpleSerializer  # importa el serializer del usuario
+from menus.serializers import MenuSerializer
+from users.serializers import UsuarioSimpleSerializer
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_nombre = serializers.CharField(source='menu.nombre', read_only=True)
     precio_unitario = serializers.DecimalField(source='menu.precio', max_digits=10, decimal_places=2, read_only=True)
+    menu_stock = serializers.IntegerField(source='menu.stock', read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'menu', 'menu_nombre', 'precio_unitario', 'cantidad', 'subtotal']
-        read_only_fields = ['subtotal', 'menu_nombre', 'precio_unitario']
+        fields = ['id', 'menu', 'menu_nombre', 'menu_stock', 'precio_unitario', 'cantidad', 'subtotal']
+        read_only_fields = ['subtotal', 'menu_nombre', 'precio_unitario', 'menu_stock']
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['menu'] = MenuSerializer(instance.menu).data  # incluye detalles completos del menú
+        return rep
 
     def validate_cantidad(self, value):
         if value <= 0:
@@ -22,7 +29,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
     total = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    usuario = UsuarioSimpleSerializer(read_only=True) 
+    usuario = UsuarioSimpleSerializer(read_only=True)
 
     class Meta:
         model = Order
@@ -38,9 +45,8 @@ class OrderSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        items_data = validated_data.pop('items')
-        usuario = validated_data.pop('usuario')
-        order = Order.objects.create(usuario=usuario, **validated_data)
+        items_data = validated_data.pop('items') 
+        order = Order.objects.create(**validated_data) 
 
         for item_data in items_data:
             OrderItem.objects.create(order=order, **item_data)

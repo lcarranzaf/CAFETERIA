@@ -1,7 +1,4 @@
-"use client"
-
 const FilterSidebar = ({
-  // Props para pedidos
   fechaSeleccionada,
   setFechaSeleccionada,
   fechaHasta,
@@ -12,11 +9,12 @@ const FilterSidebar = ({
   setEstadoPago,
   usuarioFiltro,
   setUsuarioFiltro,
+  numeroPedido,
+  setNumeroPedido,
   ordenamiento,
   setOrdenamiento,
   limpiarFiltros,
   ordenesFiltradas,
-  // Props para recompensas
   fechaRecompensaDesde,
   setFechaRecompensaDesde,
   fechaRecompensaHasta,
@@ -31,7 +29,7 @@ const FilterSidebar = ({
   sidebarCollapsed,
   setSidebarCollapsed,
   dateRef,
-  dateHastaRef, // Agregar este nuevo ref
+  dateHastaRef,
 }) => {
   const contarFiltrosActivos = () => {
     let count = 0
@@ -41,6 +39,7 @@ const FilterSidebar = ({
       if (estadoReserva) count++
       if (estadoPago) count++
       if (usuarioFiltro) count++
+      if (numeroPedido) count++
       if (ordenamiento !== "fecha_desc") count++
     } else {
       if (fechaRecompensaDesde) count++
@@ -53,10 +52,11 @@ const FilterSidebar = ({
 
   return (
     <div
-      className={`${sidebarCollapsed ? "w-16" : "w-80"} transition-all duration-300 bg-white shadow-xl border-r border-slate-200 min-h-[calc(100vh-80px)] sticky top-20`}
+      className={`${
+        sidebarCollapsed ? "w-16" : "w-80"
+      } transition-all duration-300 bg-white shadow-xl border-r border-slate-200 min-h-[calc(100vh-80px)] sticky top-20`}
     >
       <div className="p-6">
-        {/* Header del Sidebar */}
         <div className="flex items-center justify-between mb-6">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-3">
@@ -82,11 +82,9 @@ const FilterSidebar = ({
         {!sidebarCollapsed && (
           <div className="space-y-6">
             {vista === "pedidos" ? (
-              // Filtros para Pedidos
               <>
-                {/* Rango de Fechas para Pedidos */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">📅</span>
                     Rango de Fechas
                   </label>
@@ -98,11 +96,6 @@ const FilterSidebar = ({
                         value={fechaSeleccionada}
                         onChange={(e) => setFechaSeleccionada(e.target.value)}
                         className="w-full border-2 border-slate-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700 cursor-pointer hover:border-blue-400"
-                        style={{
-                          colorScheme: "light",
-                          WebkitAppearance: "none",
-                          MozAppearance: "textfield",
-                        }}
                       />
                     </div>
                     <div>
@@ -112,19 +105,27 @@ const FilterSidebar = ({
                         value={fechaHasta}
                         onChange={(e) => setFechaHasta(e.target.value)}
                         className="w-full border-2 border-slate-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700 cursor-pointer hover:border-blue-400"
-                        style={{
-                          colorScheme: "light",
-                          WebkitAppearance: "none",
-                          MozAppearance: "textfield",
-                        }}
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Usuario */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
+                    <span className="text-lg">🔢</span>
+                    Número de Pedido
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Buscar por ID..."
+                    value={numeroPedido}
+                    onChange={(e) => setNumeroPedido(e.target.value)}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">👤</span>
                     Usuario
                   </label>
@@ -137,9 +138,8 @@ const FilterSidebar = ({
                   />
                 </div>
 
-                {/* Estado de Reserva */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">📦</span>
                     Estado de Reserva
                   </label>
@@ -156,9 +156,8 @@ const FilterSidebar = ({
                   </select>
                 </div>
 
-                {/* Estado de Pago */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">💳</span>
                     Estado de Pago
                   </label>
@@ -174,9 +173,8 @@ const FilterSidebar = ({
                   </select>
                 </div>
 
-                {/* Ordenamiento */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">🔄</span>
                     Ordenar por
                   </label>
@@ -194,7 +192,6 @@ const FilterSidebar = ({
                   </select>
                 </div>
 
-                {/* Botón Limpiar y Resumen */}
                 <button
                   onClick={limpiarFiltros}
                   className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"
@@ -211,11 +208,9 @@ const FilterSidebar = ({
                 </div>
               </>
             ) : (
-              // Filtros para Recompensas
-              <>
-                {/* Rango de Fechas */}
+               <>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">📅</span>
                     Rango de Fechas
                   </label>
@@ -250,10 +245,8 @@ const FilterSidebar = ({
                     </div>
                   </div>
                 </div>
-
-                {/* Usuario */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3 items-center gap-2">
                     <span className="text-lg">👤</span>
                     Usuario
                   </label>
@@ -265,10 +258,8 @@ const FilterSidebar = ({
                     className="w-full border border-slate-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all text-slate-700"
                   />
                 </div>
-
-                {/* Recompensa */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-3  items-center gap-2">
                     <span className="text-lg">🎁</span>
                     Recompensa
                   </label>
@@ -280,8 +271,6 @@ const FilterSidebar = ({
                     className="w-full border border-slate-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all text-slate-700"
                   />
                 </div>
-
-                {/* Botón Limpiar y Resumen */}
                 <button
                   onClick={limpiarFiltrosRecompensas}
                   className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"

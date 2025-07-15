@@ -1,18 +1,16 @@
-"use client"
-
 import { useEffect, useState, useRef } from "react"
 import api from "../services/api"
-import Navbar from "../components/Navbar"
+import Navbar from "../components/layout/Navbar"
 import { HiArrowLeft } from "react-icons/hi"
 import { Link } from "react-router-dom"
 import { obtenerRecompensasPorUsuario, obtenerHistorialTodos } from "../services/recompensasService"
 import { useAuth } from "../context/AuthContext"
+import Toast from "../components/Toast"
 
-// Importar componentes
-import FilterSidebar from "../components/Gention_pedido_admin/FilterSidebar"
-import ViewToggle from "../components/Gention_pedido_admin/ViewToggle"
-import PedidoCard from "../components/Gention_pedido_admin/PedidoCard"
-import RecompensaCard from "../components/Gention_pedido_admin/RecompensaCard"
+import FilterSidebar from "../components/Gestion_pedido_admin/FilterSidebar"
+import ViewToggle from "../components/Gestion_pedido_admin/ViewToggle"
+import PedidoCard from "../components/Gestion_pedido_admin/PedidoCard"
+import RecompensaCard from "../components/Gestion_pedido_admin/RecompensaCard"
 
 const AdminPedidosPage = () => {
   const [ordenes, setOrdenes] = useState([])
@@ -21,6 +19,7 @@ const AdminPedidosPage = () => {
   const [estadoReserva, setEstadoReserva] = useState("")
   const [estadoPago, setEstadoPago] = useState("")
   const [usuarioFiltro, setUsuarioFiltro] = useState("")
+  const [numeroPedido, setNumeroPedido] = useState("")
   const [ordenamiento, setOrdenamiento] = useState("fecha_desc")
   const [actualizados, setActualizados] = useState({})
   const [recompensasPorUsuario, setRecompensasPorUsuario] = useState({})
@@ -29,7 +28,6 @@ const AdminPedidosPage = () => {
   const [isLoading, setIsLoading] = useState({})
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
-  // Filtros para recompensas
   const [fechaRecompensaDesde, setFechaRecompensaDesde] = useState("")
   const [fechaRecompensaHasta, setFechaRecompensaHasta] = useState("")
   const [usuarioRecompensaFiltro, setUsuarioRecompensaFiltro] = useState("")
@@ -37,7 +35,21 @@ const AdminPedidosPage = () => {
 
   const { authTokens } = useAuth()
   const dateRef = useRef(null)
-  const dateHastaRef = useRef(null) // Agregar este nuevo ref
+  const dateHastaRef = useRef(null) 
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const obtenerFechaLocal = () => {
+    const hoy = new Date();
+    const offset = hoy.getTimezoneOffset();
+    const localDate = new Date(hoy.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().split("T")[0];
+  };
+
+
+  useEffect(() => {
+    const hoy = obtenerFechaLocal();
+    setFechaSeleccionada(hoy);
+    setFechaHasta(hoy);
+  }, []);
 
   useEffect(() => {
     api
@@ -45,6 +57,13 @@ const AdminPedidosPage = () => {
       .then((res) => setOrdenes(res.data))
       .catch((err) => console.error("Error al cargar órdenes:", err))
   }, [])
+
+  const mostrarToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }));
+    }, 3000);
+  };
 
   useEffect(() => {
     const cargarRecompensas = async () => {
@@ -93,20 +112,29 @@ const AdminPedidosPage = () => {
     }))
   }
 
-  const guardarCambios = async (id) => {
-    if (!actualizados[id]) return
-
-    setIsLoading((prev) => ({ ...prev, [id]: true }))
-    try {
-      await api.patch(`orders/${id}/`, actualizados[id])
-      alert("✅ Cambios guardados")
-      window.location.reload()
-    } catch (error) {
-      alert("❌ Error al guardar cambios")
-    } finally {
-      setIsLoading((prev) => ({ ...prev, [id]: false }))
+ const guardarCambios = async (id) => {
+    const cambios = actualizados[id];
+    if (!cambios || (!cambios.estado_reserva && !cambios.estado_pago)) {
+      mostrarToast("⚠️ No hay cambios para guardar", "warning");
+      return;
     }
-  }
+
+    const payload = {};
+    if (cambios.estado_reserva) payload.estado_reserva = cambios.estado_reserva;
+    if (cambios.estado_pago) payload.estado_pago = cambios.estado_pago;
+
+    setIsLoading((prev) => ({ ...prev, [id]: true }));
+    try {
+      await api.patch(`orders/${id}/aprobar/`, payload);
+      mostrarToast("✅ Cambios guardados exitosamente", "success");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al guardar:", error.response?.data || error.message);
+      mostrarToast("❌ Error al guardar cambios", "error");
+    } finally {
+      setIsLoading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
 
   const limpiarFiltros = () => {
     setFechaSeleccionada("")
@@ -114,6 +142,7 @@ const AdminPedidosPage = () => {
     setEstadoReserva("")
     setEstadoPago("")
     setUsuarioFiltro("")
+    setNumeroPedido("")
     setOrdenamiento("fecha_desc")
   }
 
@@ -170,15 +199,19 @@ const AdminPedidosPage = () => {
   const ordenesFiltradas = ordenarPedidos(
     ordenes.filter((o) => {
       const fechaOrden = new Date(o.fecha_orden).toLocaleDateString("en-CA")
-      const fechaDesdeOk = fechaSeleccionada ? fechaOrden >= fechaSeleccionada : true
-      const fechaHastaOk = fechaHasta ? fechaOrden <= fechaHasta : true
+      const buscandoPorNumero = numeroPedido !== ""
+
+      const fechaDesdeOk = buscandoPorNumero ? true : fechaSeleccionada ? fechaOrden >= fechaSeleccionada : true
+      const fechaHastaOk = buscandoPorNumero ? true : fechaHasta ? fechaOrden <= fechaHasta : true
+
       const reservaOk = estadoReserva ? o.estado_reserva === estadoReserva : true
       const pagoOk = estadoPago ? o.estado_pago === estadoPago : true
       const usuarioOk = usuarioFiltro
         ? `${o.usuario?.first_name} ${o.usuario?.last_name}`.toLowerCase().includes(usuarioFiltro.toLowerCase())
         : true
+      const numeroOk = numeroPedido ? String(o.id) === numeroPedido : true
 
-      return fechaDesdeOk && fechaHastaOk && reservaOk && pagoOk && usuarioOk
+      return fechaDesdeOk && fechaHastaOk && reservaOk && pagoOk && usuarioOk && numeroOk;
     }),
   )
 
@@ -200,7 +233,6 @@ const AdminPedidosPage = () => {
       <Navbar />
 
       <div className="flex pt-4">
-        {/* Sidebar de Filtros */}
         <FilterSidebar
           fechaSeleccionada={fechaSeleccionada}
           setFechaSeleccionada={setFechaSeleccionada}
@@ -212,6 +244,8 @@ const AdminPedidosPage = () => {
           setEstadoPago={setEstadoPago}
           usuarioFiltro={usuarioFiltro}
           setUsuarioFiltro={setUsuarioFiltro}
+          numeroPedido={numeroPedido}
+          setNumeroPedido={setNumeroPedido}
           ordenamiento={ordenamiento}
           setOrdenamiento={setOrdenamiento}
           limpiarFiltros={limpiarFiltros}
@@ -230,12 +264,10 @@ const AdminPedidosPage = () => {
           sidebarCollapsed={sidebarCollapsed}
           setSidebarCollapsed={setSidebarCollapsed}
           dateRef={dateRef}
-          dateHastaRef={dateHastaRef} // Agregar esta línea
+          dateHastaRef={dateHastaRef}
         />
 
-        {/* Contenido Principal */}
         <div className="flex-1 p-6">
-          {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl shadow-lg">
@@ -257,10 +289,8 @@ const AdminPedidosPage = () => {
             </Link>
           </div>
 
-          {/* Toggle de vista */}
           <ViewToggle vista={vista} setVista={setVista} ordenes={ordenes} recompensasCanjeadas={recompensasCanjeadas} />
 
-          {/* Contenido según la vista */}
           {vista === "recompensas" ? (
             <div className="space-y-8">
               {recompensasFiltradas.length === 0 ? (
@@ -309,6 +339,7 @@ const AdminPedidosPage = () => {
           )}
         </div>
       </div>
+      {toast.show && <Toast message={toast.message} show={toast.show} type={toast.type} />}
     </div>
   )
 }

@@ -1,23 +1,25 @@
-"use client"
-
 import { useContext, useEffect, useState } from "react"
 import Modal from "./Modal"
 import { OrderContext } from "../context/OrderContext"
 import { Link } from "react-router-dom"
 import api from "../services/api"
 import Toast from "./Toast"
-
+import { useRef } from "react";
+import ImagenQR from "../components/ImagenQQR"
 const PedidoModal = ({ isOpen, onClose }) => {
   const { pedido, eliminarDelPedido, confirmarPedido, actualizarCantidadPedido } = useContext(OrderContext)
   const [orderId, setOrderId] = useState(null)
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState(false)
   const [metodoPagoSeleccionado, setMetodoPagoSeleccionado] = useState(null)
   const [comprobante, setComprobante] = useState(null)
+  const [previewComprobante, setPreviewComprobante] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [showToast, setShowToast] = useState(false)
+  const inputFileRef = useRef(null);
 
   const total = pedido.reduce((acc, item) => acc + item.precio * item.cantidad, 0).toFixed(2)
+  const hayStockInsuficiente = pedido.some(item => item.cantidad > item.stock)
 
   useEffect(() => {
     if (!isOpen) {
@@ -25,6 +27,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
       setMensajeConfirmacion(false)
       setMetodoPagoSeleccionado(null)
       setComprobante(null)
+      setPreviewComprobante(null)
       setIsLoading(false)
       setToastMessage('')
       setShowToast(false)
@@ -53,8 +56,13 @@ const PedidoModal = ({ isOpen, onClose }) => {
   }
 
   const handleActualizarCantidad = (id, nuevaCantidad) => {
+    const item = pedido.find(p => p.id === id)
+    if (!item) return
+
     if (nuevaCantidad < 1) {
       eliminarDelPedido(id)
+    } else if (nuevaCantidad > item.stock) {
+      mostrarToast(`❌ Stock agotado para ${item.nombre}`)
     } else {
       actualizarCantidadPedido(id, nuevaCantidad)
     }
@@ -78,9 +86,10 @@ const PedidoModal = ({ isOpen, onClose }) => {
       mostrarToast("Comprobante subido correctamente ✅")
       setMetodoPagoSeleccionado(null)
       setComprobante(null)
+      setPreviewComprobante(null)
       setTimeout(() => {
-        onClose();
-      }, 1500);
+        onClose()
+      }, 1500)
     } catch (error) {
       console.error("Error al subir comprobante:", error)
       alert("❌ Error al subir comprobante.")
@@ -130,14 +139,13 @@ const PedidoModal = ({ isOpen, onClose }) => {
                             Subtotal: ${(item.precio * item.cantidad).toFixed(2)}
                           </p>
                         </div>
-
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-start gap-1">
                           <span className="text-xs font-medium text-slate-600">Cantidad:</span>
                           <div className="flex items-center bg-white border border-slate-300 rounded overflow-hidden">
                             <button
                               onClick={() => handleActualizarCantidad(item.id, item.cantidad - 1)}
                               className="px-2 py-1 bg-gray-300 hover:bg-slate-100 transition-colors text-slate-600 hover:text-slate-800 font-bold"
+                              disabled={item.cantidad <= 1}
                             >
                               −
                             </button>
@@ -145,21 +153,30 @@ const PedidoModal = ({ isOpen, onClose }) => {
                             <button
                               onClick={() => handleActualizarCantidad(item.id, item.cantidad + 1)}
                               className="px-2 py-1 bg-gray-300 hover:bg-slate-100 transition-colors text-slate-600 hover:text-slate-800 font-bold"
+                              disabled={item.cantidad >= item.stock}
                             >
                               +
                             </button>
                           </div>
+                          <p className="text-xs text-slate-500">
+                            Stock disponible:{" "}
+                            <span className={`font-semibold ${item.stock === 0 ? "text-red-500" : "text-emerald-600"}`}>
+                              {item.stock}
+                            </span>
+                          </p>
+                          {item.cantidad > item.stock && (
+                            <p className="text-xs text-red-500 font-medium mt-1">
+                              Stock insuficiente para {item.nombre}
+                            </p>
+                          )}
                         </div>
                       </div>
-
                       <button
                         onClick={() => eliminarDelPedido(item.id)}
                         className="ml-2 p-1 bg-gray-300 text-red-500 hover:bg-red-400 rounded transition-colors group"
                         title="Eliminar producto"
                       >
-                        <span className="text-lg group-hover:scale-110 transition-transform duration-150 inline-block ">
-                          🗑️
-                        </span>
+                        <span className="text-lg group-hover:scale-110 transition-transform duration-150 inline-block">🗑️</span>
                       </button>
                     </div>
                   </div>
@@ -177,7 +194,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
                   <button
                     className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-2 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     onClick={handleConfirmarPedido}
-                    disabled={isLoading}
+                    disabled={isLoading || hayStockInsuficiente}
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center gap-2">
@@ -195,9 +212,9 @@ const PedidoModal = ({ isOpen, onClose }) => {
               </div>
             )}
 
+            {/* Confirmación de pedido y subida de comprobante */}
             {mensajeConfirmacion && (
               <div className="space-y-4">
-                {/* Método de pago */}
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">💳</span>
@@ -218,7 +235,6 @@ const PedidoModal = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {/* Info y QR DEUNA */}
                 {metodoPagoSeleccionado === "DEUNA" && (
                   <>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center space-y-3">
@@ -236,11 +252,10 @@ const PedidoModal = ({ isOpen, onClose }) => {
                         Ir a DEUNA
                       </a>
                       <div className="bg-white p-3 rounded-lg border border-blue-200 inline-block">
-                        <img src="/qrDeuna.jpeg" alt="QR Deuna" className="w-24 h-24 mx-auto rounded" />
+                        <ImagenQR className="transition-transform duration-300 ease-in-out hover:scale-110" />
                       </div>
                     </div>
 
-                    {/* Subir comprobante */}
                     <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-lg">📄</span>
@@ -248,11 +263,43 @@ const PedidoModal = ({ isOpen, onClose }) => {
                       </div>
                       <div className="space-y-3">
                         <input
+                          ref={inputFileRef}
                           type="file"
                           accept="image/*"
-                          onChange={(e) => setComprobante(e.target.files[0])}
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              setComprobante(file);
+                              setPreviewComprobante(URL.createObjectURL(file));
+                            }
+                          }}
                           className="w-full p-3 border-2 border-dashed border-slate-300 rounded-lg bg-white hover:border-slate-400 transition-colors duration-200 text-sm file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
                         />
+
+                        {previewComprobante && (
+                          <div className="mt-2 text-center">
+                            <p className="text-sm text-slate-600 mb-2">Vista previa del comprobante:</p>
+                            <img
+                              src={previewComprobante}
+                              alt="Vista previa del comprobante"
+                              className="w-40 h-40 object-contain mx-auto border rounded"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setComprobante(null);
+                                setPreviewComprobante(null);
+                                if (inputFileRef.current) {
+                                  inputFileRef.current.value = null;
+                                }
+                              }}
+                              className="mt-2 text-red-500 hover:underline text-sm"
+                            >
+                              Eliminar comprobante seleccionado
+                            </button>
+                          </div>
+                        )}
+
                         <button
                           onClick={handleSubirComprobante}
                           disabled={!comprobante || isLoading}
@@ -275,7 +322,6 @@ const PedidoModal = ({ isOpen, onClose }) => {
                   </>
                 )}
 
-                {/* Confirmación */}
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <span className="text-xl">✅</span>
@@ -298,8 +344,6 @@ const PedidoModal = ({ isOpen, onClose }) => {
           </>
         )}
       </Modal>
-
-      {/* ✅ Toast de éxito */}
       <Toast message={toastMessage} show={showToast} type="success" />
     </>
   )

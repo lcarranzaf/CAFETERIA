@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/', include('reviews.urls')),
     path('api/', include('rewards.urls')),
     path('api/', include('chatbot.urls')),
+    path('api/', include('notificaciones.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

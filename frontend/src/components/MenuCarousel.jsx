@@ -1,4 +1,4 @@
-import React, { useRef, useContext, useState } from 'react';
+import React, { useRef, useContext, useState, useEffect } from 'react';
 import MenuCard from './MenuCard';
 import { OrderContext } from '../context/OrderContext';
 import Toast from './Toast';
@@ -9,64 +9,77 @@ const MenuCarousel = ({ items }) => {
   const { agregarAlPedido } = useContext(OrderContext);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [carouselItems, setCarouselItems] = useState([]);
 
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({
-        left: direction === 'left' ? -300 : 300,
-        behavior: 'smooth',
-      });
+  useEffect(() => {
+    if (Array.isArray(items) && items.length > 0) {
+      setCarouselItems(items);
     }
+  }, [items]);
+
+  const scrollLeft = () => {
+    if (carouselItems.length === 0) return;
+    const updatedItems = [...carouselItems];
+    const last = updatedItems.pop();
+    updatedItems.unshift(last);
+    setCarouselItems(updatedItems);
+  };
+
+  const scrollRight = () => {
+    if (carouselItems.length === 0) return;
+    const updatedItems = [...carouselItems];
+    const first = updatedItems.shift();
+    updatedItems.push(first);
+    setCarouselItems(updatedItems);
   };
 
   const handleAgregar = (item) => {
     agregarAlPedido(item);
-    setToastMessage(` ${item.nombre} agregado al pedido`);
+    setToastMessage(`${item.nombre} agregado al pedido`);
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2000);
   };
 
   return (
-    <div className="relative">
-      {/* Botón Izquierdo */}
+    <div className="relative w-full">
+    
       <button
-        onClick={() => scroll('left')}
+        onClick={scrollLeft}
         className="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-300 border rounded-full p-2 shadow z-10"
       >
         ◀
       </button>
 
-      {/* Carrusel de Menús */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-hidden scrollbar-hide gap-6 px-4 py-2 scroll-smooth snap-x snap-mandatory"
+        className="flex overflow-x-hidden scrollbar-hide gap-6 px-12 py-2 scroll-smooth snap-x snap-mandatory justify-center"
       >
-        {items.map((item) => (
-          <div
-            key={item.id}
-            className="min-w-[250px] max-w-[250px] snap-start flex-shrink-0"
-          >
-            <div className="flex flex-col justify-between h-full bg-gray-100 rounded-xl p-4 text-center shadow-md">
-              <MenuCard
-                id={item.id}
-                nombre={item.nombre}
-                descripcion={item.descripcion}
-                precio={item.precio}
-                imagen={item.imagen || '/placeholder.png'}
-                onAgregar={() => handleAgregar(item)}
-                promedio={item.promedio_calificacion} 
-                cantidad={item.cantidad_reviews} 
-                extraContent={<MenuReviewForm menuId={item.id} />}
-              />
-
+        {carouselItems.map((item, index) =>
+          item ? (
+            <div
+              key={`${item.id}-${index}`}
+              className="min-w-[250px] max-w-[250px] snap-start flex-shrink-0"
+            >
+              <div className="flex flex-col justify-between h-full bg-gray-100 rounded-xl p-4 text-center shadow-md">
+                <MenuCard
+                  id={item.id}
+                  nombre={item.nombre}
+                  descripcion={item.descripcion}
+                  precio={item.precio}
+                  imagen={item.imagen || '/placeholder.png'}
+                  onAgregar={() => handleAgregar(item)}
+                  promedio={item.promedio_calificacion}
+                  cantidad={item.cantidad_reviews}
+                  extraContent={<MenuReviewForm menuId={item.id} />}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          ) : null
+        )}
       </div>
 
-      {/* Botón Derecho */}
       <button
-        onClick={() => scroll('right')}
+        onClick={scrollRight}
         className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-300 border rounded-full p-2 shadow z-10"
       >
         ▶

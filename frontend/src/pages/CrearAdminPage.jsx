@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/Navbar';
 import { HiArrowLeft } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 
