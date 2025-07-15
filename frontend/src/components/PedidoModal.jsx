@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 import api from "../services/api"
 import Toast from "./Toast"
 import { useRef } from "react";
-
+import ImagenQR from "../components/ImagenQQR"
 const PedidoModal = ({ isOpen, onClose }) => {
   const { pedido, eliminarDelPedido, confirmarPedido, actualizarCantidadPedido } = useContext(OrderContext)
   const [orderId, setOrderId] = useState(null)
@@ -252,7 +252,7 @@ const PedidoModal = ({ isOpen, onClose }) => {
                         Ir a DEUNA
                       </a>
                       <div className="bg-white p-3 rounded-lg border border-blue-200 inline-block">
-                        <img src="/qrDeuna.jpeg" alt="QR Deuna" className="w-24 h-24 mx-auto rounded" />
+                        <ImagenQR className="transition-transform duration-300 ease-in-out hover:scale-110" />
                       </div>
                     </div>
 

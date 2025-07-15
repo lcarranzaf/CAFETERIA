@@ -1,10 +1,11 @@
+import { Link } from "react-router-dom"
 import { FaFacebookF, FaInstagram, FaWhatsapp, FaGithub } from "react-icons/fa";
 
 const Footer = () => {
   return (
     <footer className="bg-slate-900 text-white py-10 mt-12">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Acerca de nosotros */}
+
         <div>
           <h2 className="text-xl font-bold mb-3">Acerca de Nosotros</h2>
           <p className="text-sm leading-relaxed">
@@ -12,13 +13,15 @@ const Footer = () => {
           </p>
         </div>
 
-        {/* Contacto */}
         <div>
           <h2 className="text-xl font-bold mb-3">Contáctanos</h2>
           <p className="text-sm">📍 Campus Universitario, Polideportivo</p>
           <p className="text-sm">✉️ lcarranzaf@unemi.edu.ec</p>
           <p className="text-sm">✉️ aolverab2@unemi.edu.ec</p>
+          {/* Enlace adicional */}
+          
         </div>
+
         <div>
           <h2 className="text-xl font-bold mb-3">Síguenos</h2>
 
@@ -35,10 +38,19 @@ const Footer = () => {
               Anadia Olvera
             </a>
           </div>
+          <div className="mt-2">
+            <Link
+              to="/acerca-desarrolladores"
+              className="text-xl font-bold hover:underline "
+            >
+              Acerca de los desarrolladores 
+            </Link>
+          </div>
+          
         </div>
+        
       </div>
 
-      {/* Línea inferior */}
       <div className="mt-8 text-center text-sm text-gray-400 border-t border-gray-700 pt-4">
         © {new Date().getFullYear()} Cafetería Universitaria. Todos los derechos reservados.
       </div>

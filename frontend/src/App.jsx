@@ -29,6 +29,7 @@ import GestionarRecompensas from './components/rewards/GestionarRecompensas';
 import NotificacionesPage from './pages/NotificacionesPage';
 import Footer from './components/layout/Footer';
 import PerfilPage from './pages/PerfilPage';
+import AcercaDesarrolladores from "./pages/AcercaDesarrolladores"
 
 function AppContent() {
   const [toastVisible, setToastVisible] = useState(false);
@@ -57,6 +58,7 @@ function AppContent() {
             <Route path="/historial-recompensas" element={<HistorialRecompensas />} />
             <Route path="/notificaciones" element={<NotificacionesPage />} />
             <Route path="/perfil" element={<PerfilPage />} />
+            <Route path="/acerca-desarrolladores" element={<AcercaDesarrolladores />} />
           </Route>
 
           {/* Rutas solo para administradores */}

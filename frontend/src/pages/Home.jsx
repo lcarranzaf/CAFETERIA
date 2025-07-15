@@ -20,25 +20,29 @@ const Home = () => {
       });
   }, []);
 
-  // ✅ Función para limitar la cantidad por tipo
   const seleccionarMenusPorTipo = (lista) => {
     const tiposCantidad = {
-      desayuno: 1,
+      desayuno: 2,
       almuerzo: 2,
-      piqueo: 1,
+      piqueo: 2,
       bebida: 2,
     };
 
     const resultado = [];
 
     for (const tipo in tiposCantidad) {
-      const filtrados = lista.filter((item) => item.tipo === tipo && item.disponible);
+      // Filtrar por tipo y que estén disponibles
+      const filtrados = lista
+        .filter((item) => item.tipo === tipo && item.disponible)
+        // Ordenar por promedio de estrellas (de mayor a menor)
+        .sort((a, b) => (b.estrellas || 0) - (a.estrellas || 0));
+
+      // Agregar solo los top N (según cantidad)
       resultado.push(...filtrados.slice(0, tiposCantidad[tipo]));
     }
 
     return resultado;
   };
-
   return (
     <div className="bg-white text-black min-h-screen">
       <Navbar />

@@ -11,7 +11,6 @@ const MenuCarousel = ({ items }) => {
   const [toastMessage, setToastMessage] = useState('');
   const [carouselItems, setCarouselItems] = useState([]);
 
-  // Actualizar los items cuando cambien las props
   useEffect(() => {
     if (Array.isArray(items) && items.length > 0) {
       setCarouselItems(items);
@@ -43,7 +42,7 @@ const MenuCarousel = ({ items }) => {
 
   return (
     <div className="relative w-full">
-      {/* Botón Izquierdo */}
+    
       <button
         onClick={scrollLeft}
         className="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-300 border rounded-full p-2 shadow z-10"
@@ -51,7 +50,6 @@ const MenuCarousel = ({ items }) => {
         ◀
       </button>
 
-      {/* Carrusel */}
       <div
         ref={scrollRef}
         className="flex overflow-x-hidden scrollbar-hide gap-6 px-12 py-2 scroll-smooth snap-x snap-mandatory justify-center"
@@ -80,7 +78,6 @@ const MenuCarousel = ({ items }) => {
         )}
       </div>
 
-      {/* Botón Derecho */}
       <button
         onClick={scrollRight}
         className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-300 border rounded-full p-2 shadow z-10"

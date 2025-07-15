@@ -5,7 +5,7 @@ import Navbar from "../components/layout/Navbar"
 import api from "../services/api"
 import { HiOutlineCalendar } from "react-icons/hi"
 import ImagenQR from "../components/ImagenQQR"
-import Toast from "../components/Toast" // ✅ IMPORTACIÓN DEL TOAST
+import Toast from "../components/Toast" 
 
 const ReservaPage = () => {
   const [ordenes, setOrdenes] = useState([])
