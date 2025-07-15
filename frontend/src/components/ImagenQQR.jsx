@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Modal from './Modal'; // Ajusta la ruta si es necesario
+import Modal from './Modal'; 
 
 const ImagenQR = () => {
   const [isOpen, setIsOpen] = useState(false);

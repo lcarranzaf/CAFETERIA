@@ -6,6 +6,7 @@ from django.db.models import Avg
 class MenuSerializer(serializers.ModelSerializer):
     promedio_calificacion = serializers.SerializerMethodField()
     cantidad_reviews = serializers.SerializerMethodField()
+    estrellas = serializers.SerializerMethodField()
 
     class Meta:
         model = Menu
@@ -26,3 +27,9 @@ class MenuSerializer(serializers.ModelSerializer):
             if Menu.objects.filter(nombre__iexact=value).exists():
                 raise serializers.ValidationError("Ya existe un menú con ese nombre.")
         return value
+    
+    def get_estrellas(self, obj):
+        reviews = Review.objects.filter(menu=obj)
+        if reviews.exists():
+            return round(reviews.aggregate(promedio=Avg('calificacion'))['promedio'], 1)
+        return 0

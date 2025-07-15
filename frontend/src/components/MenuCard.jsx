@@ -1,21 +1,31 @@
-"use client"
-
 import { useContext, useState } from "react"
 import { AuthContext } from "../context/AuthContext"
 import api from "../services/api"
 import SuccessModal from "./SuccessModal"
+import Toast from "./Toast"
 import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa"
 
 const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar, promedio = 5, cantidad = 0, extraContent }) => {
   const { user } = useContext(AuthContext)
   const [modalVisible, setModalVisible] = useState(false)
 
+
+  const [toastVisible, setToastVisible] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+  const [toastType, setToastType] = useState('success')
+
   const destacar = async () => {
     try {
       await api.post(`menus/${id}/set_destacado/`)
-      alert("✅ Plato marcado como destacado")
+      setToastMessage("✅ Plato marcado como destacado")
+      setToastType("success")
+      setToastVisible(true)
+      setTimeout(() => setToastVisible(false), 2500)
     } catch (err) {
-      alert("❌ Error al marcar como destacado")
+      setToastMessage("❌ Error al marcar como destacado")
+      setToastType("error")
+      setToastVisible(true)
+      setTimeout(() => setToastVisible(false), 2500)
       console.error(err)
     }
   }
@@ -54,7 +64,7 @@ const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar, promedio
 
   return (
     <div className="bg-gradient-to-b from-purple-50 rounded-2xl sm:rounded-3xl p-3 sm:p-4 py-6 sm:py-8 md:py-12 text-center flex flex-col justify-between h-full shadow-lg hover:shadow-2xl transition-all duration-300 border border-purple-200 hover:border-purple-300 hover:-translate-y-1 sm:hover:-translate-y-2 hover:scale-102 sm:hover:scale-105 cursor-pointer group max-w-sm mx-auto">
-      {/* Imagen del plato - Responsive */}
+
       <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 mb-3 sm:mb-4 shadow-sm group-hover:shadow-md transition-all duration-300">
         <img
           src={imagen || "/plato.png"}
@@ -64,7 +74,6 @@ const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar, promedio
         />
       </div>
 
-      {/* Calificación con estrellas - Responsive */}
       <div className="flex items-center justify-center gap-1 mb-2 sm:mb-3 group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-300">
         <div className="flex items-center gap-0.5 sm:gap-1">{renderEstrellas(promedio)}</div>
         <span className="ml-1 sm:ml-2 text-gray-700 font-bold text-sm sm:text-base md:text-lg bg-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-sm group-hover:shadow-md transition-all duration-300">
@@ -72,22 +81,18 @@ const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar, promedio
         </span>
       </div>
 
-      {/* Título del plato - Responsive */}
       <h3 className="font-bold capitalize text-lg sm:text-xl text-gray-800 mb-1 sm:mb-2 leading-tight group-hover:text-purple-700 transition-colors duration-300 px-1">
         {nombre}
       </h3>
 
-      {/* Descripción - Responsive */}
       <p className="text-xs sm:text-sm text-gray-700 capitalize mb-2 sm:mb-3 leading-relaxed px-1 sm:px-2 group-hover:text-gray-800 transition-colors duration-300 line-clamp-2">
         {descripcion}
       </p>
 
-      {/* Precio destacado - Responsive */}
       <p className="text-xl sm:text-2xl font-bold text-green-600 mb-3 sm:mb-4 bg-white rounded-full py-1.5 sm:py-2 px-3 sm:px-4 shadow-sm inline-block group-hover:shadow-md group-hover:text-green-700 transition-all duration-300">
         ${Number(precio).toFixed(2)}
       </p>
 
-      {/* Botón agregar al pedido - Responsive */}
       <button
         onClick={handleAgregar}
         disabled={!onAgregar}
@@ -101,7 +106,6 @@ const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar, promedio
         </span>
       </button>
 
-      {/* Botón destacar (solo para staff) - Responsive */}
       {user?.is_staff && (
         <button
           onClick={destacar}
@@ -114,13 +118,13 @@ const MenuCard = ({ id, nombre, precio, descripcion, imagen, onAgregar, promedio
         </button>
       )}
 
-      {/* Contenido extra - Responsive */}
       {extraContent && <div className="mt-1 sm:mt-2">{extraContent}</div>}
 
-      {/* Modal de éxito */}
       {modalVisible && (
         <SuccessModal mensaje={`✅ ${nombre} agregado al pedido`} onClose={() => setModalVisible(false)} />
       )}
+
+      <Toast message={toastMessage} show={toastVisible} type={toastType} />
     </div>
   )
 }

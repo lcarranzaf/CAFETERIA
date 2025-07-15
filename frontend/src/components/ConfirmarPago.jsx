@@ -7,7 +7,7 @@ const ConfirmarPago = ({ orderId, onConfirmado }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
 
-  // Mostrar preview cuando cambia el comprobante
+
   useEffect(() => {
     if (!comprobante) {
       setPreviewUrl(null);

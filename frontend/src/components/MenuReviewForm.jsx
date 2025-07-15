@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import api from "../services/api"
 import Modal from "./Modal"
@@ -67,12 +65,10 @@ const MenuReviewForm = ({ menuId,nombreMenu }) => {
       setPromedioGlobal((total / nuevasReseñas.length).toFixed(1))
       setCantidad(nuevasReseñas.length)
 
-      // ✅ Actualizamos estado correctamente
+     
       setYaComentado(true)
-      setVistaActiva("ver") // o "calificar" si prefieres
-      setMensaje("") // ya no es necesario, ahora se usa Toast
-
-      // ✅ Mostrar Toast de éxito
+      setVistaActiva("ver") 
+      setMensaje("") 
       setToastMessage("✅ Reseña guardada correctamente")
       setToastType("success")
       setToastVisible(true)

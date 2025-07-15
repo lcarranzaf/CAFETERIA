@@ -53,7 +53,6 @@ const ReservaPage = () => {
     setOrdenes((prev) => prev.map((orden) => (orden.id === id ? { ...orden, metodo_pago: e.target.value } : orden)))
   }
 
-  // ✅ ACTUALIZACIÓN CON TOAST EN VEZ DE ALERT
   const handleComprobanteUpload = async (orden) => {
     const file = comprobantes[orden.id]
     if (!file || !orden.metodo_pago) {
