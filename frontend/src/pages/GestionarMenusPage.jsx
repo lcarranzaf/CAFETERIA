@@ -6,6 +6,7 @@ import api from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 import EditarMenuModal from "../components/EditarMenuModal";
 import Toast from "../components/Toast";
+import Modal from "../components/Modal";
 
 const tipos = ["desayuno", "almuerzo", "piqueo", "bebida"];
 
@@ -16,6 +17,8 @@ const GestionarMenusPage = () => {
   const [editandoId, setEditandoId] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+  const [menuAEliminar, setMenuAEliminar] = useState(null);
   const [form, setForm] = useState({
     nombre: "",
     descripcion: "",
@@ -97,7 +100,6 @@ const GestionarMenusPage = () => {
 
   const handleEditClick = (menu) => {
     setEditandoId(menu.id);
-    // Solo llenar el formulario de edición, no el principal
     setEditForm({
       nombre: menu.nombre,
       descripcion: menu.descripcion,
@@ -128,24 +130,13 @@ const GestionarMenusPage = () => {
     e.preventDefault();
     if (!user || !user.is_staff) return;
 
-    if (
-      !form.precio ||
-      Number.parseFloat(form.precio) <= 0 ||
-      isNaN(Number.parseFloat(form.precio))
-    ) {
+    if (!form.precio || Number.parseFloat(form.precio) <= 0 || isNaN(Number.parseFloat(form.precio))) {
       showToast("❌ El precio debe ser mayor a 0", "warning");
       return;
     }
 
-    if (
-      !form.stock ||
-      Number.parseInt(form.stock) < 0 ||
-      isNaN(Number.parseInt(form.stock))
-    ) {
-      showToast(
-        "❌ El stock debe ser un número válido mayor o igual a 0",
-        "warning"
-      );
+    if (!form.stock || Number.parseInt(form.stock) < 0 || isNaN(Number.parseInt(form.stock))) {
+      showToast("❌ El stock debe ser un número válido mayor o igual a 0", "warning");
       return;
     }
 
@@ -176,7 +167,7 @@ const GestionarMenusPage = () => {
       });
 
       showToast("✅ Menú creado correctamente", "success");
-      limpiarFormulario(); // Limpiar formulario después de crear
+      limpiarFormulario();
 
       const res = await api.get("menus/");
       setMenus(res.data);
@@ -187,9 +178,7 @@ const GestionarMenusPage = () => {
           showToast(`❌ ${data.nombre[0]}`, "error");
         } else {
           const firstKey = Object.keys(data)[0];
-          const firstError = Array.isArray(data[firstKey])
-            ? data[firstKey][0]
-            : data[firstKey];
+          const firstError = Array.isArray(data[firstKey]) ? data[firstKey][0] : data[firstKey];
           showToast(`❌ ${firstError}`, "error");
         }
       } else if (data?.detail) {
@@ -243,9 +232,7 @@ const GestionarMenusPage = () => {
           showToast(`❌ ${data.nombre[0]}`, "error");
         } else {
           const firstKey = Object.keys(data)[0];
-          const firstError = Array.isArray(data[firstKey])
-            ? data[firstKey][0]
-            : data[firstKey];
+          const firstError = Array.isArray(data[firstKey]) ? data[firstKey][0] : data[firstKey];
           showToast(`❌ ${firstError}`, "error");
         }
       } else if (data?.detail) {
@@ -256,6 +243,47 @@ const GestionarMenusPage = () => {
       console.error("Error editando menú:", err);
     } finally {
       setSubiendo(false);
+    }
+  };
+
+  const handleDeleteMenu = async (id) => {
+    if (!user || !user.is_staff) return;
+
+    try {
+      await api.delete(`menus/${id}/`, {
+        headers: {
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+      });
+      showToast("🗑️ Menú eliminado correctamente", "success");
+      setModalAbierto(false);
+      setEditandoId(null);
+
+      const res = await api.get("menus/");
+      setMenus(res.data);
+    } catch (err) {
+      console.error("Error eliminando menú:", err);
+      showToast("❌ Error al eliminar el menú", "error");
+    }
+  };
+
+  const handleConfirmarEliminar = async () => {
+    if (!menuAEliminar) return;
+
+    try {
+      await api.delete(`menus/${menuAEliminar.id}/`, {
+        headers: {
+          Authorization: `Bearer ${authTokens.access}`,
+        },
+      });
+      showToast("🗑️ Menú eliminado correctamente", "success");
+      setMenus((prev) => prev.filter((m) => m.id !== menuAEliminar.id));
+    } catch (err) {
+      console.error("Error eliminando menú:", err);
+      showToast("❌ Error al eliminar el menú", "error");
+    } finally {
+      setMostrarConfirmacion(false);
+      setMenuAEliminar(null);
     }
   };
 
@@ -276,8 +304,8 @@ const GestionarMenusPage = () => {
               onClick={() => setModo("crear")}
               className={`px-6 py-3 rounded-md border-black bg-white font-bold transition-all ${
                 modo === "crear"
-                  ? "bg-orange-300 text-black shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-orange-600 text-black shadow-md"
+                  : "text-gray-600 hover:bg-gray-400"
               }`}
             >
               ➕ Agregar Plato
@@ -286,8 +314,8 @@ const GestionarMenusPage = () => {
               onClick={() => setModo("editar")}
               className={`px-6 py-3 border-black rounded-md font-extraboldtransition-all bg-white ${
                 modo === "editar"
-                  ? "bg-orange-300 text-black shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-orange-600 text-black shadow-md"
+                  : "text-gray-600 hover:bg-gray-400"
               }`}
             >
               📋 Administrar Platos
@@ -486,9 +514,20 @@ const GestionarMenusPage = () => {
                   </div>
                   <button
                     onClick={() => handleEditClick(menu)}
-                    className="w-full bg-orange-400 text-black py-2 rounded-lg font-medium hover:bg-yellow-600 transition-colors"
+                    className="w-full bg-orange-400 text-black py-2 rounded-lg font-medium hover:bg-yellow-600 transition-colors mb-2"
                   >
                     ✏️ Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuAEliminar(menu);
+                      setMostrarConfirmacion(true);
+                    }}
+                    className="w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition-colors"
+                  >
+                    🗑 Eliminar menú
                   </button>
                 </div>
               ))}
@@ -499,14 +538,38 @@ const GestionarMenusPage = () => {
 
       {modalAbierto && (
         <EditarMenuModal
-          form={editForm}
+          form={{ ...editForm, id: editandoId }} 
           onChange={handleEditChange}
           onClose={() => setModalAbierto(false)}
           onSubmit={handleEditSubmit}
+          onDelete={handleDeleteMenu} 
           preview={editPreview}
           setPreview={setEditPreview}
         />
       )}
+      {mostrarConfirmacion && (
+        <Modal isOpen={true} onClose={() => setMostrarConfirmacion(false)}>
+          <h2 className="text-lg font-semibold mb-4 text-center">¿Estás seguro?</h2>
+          <p className="mb-6 text-gray-800 text-center">
+            Esta acción eliminará el menú permanentemente.
+          </p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => setMostrarConfirmacion(false)}
+              className="px-5 py-2 bg-gray-300 rounded hover:bg-gray-400 text-black font-semibold"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirmarEliminar}
+              className="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold"
+            >
+              Aceptar y continuar
+            </button>
+          </div>
+        </Modal>
+      )}
+
 
       {toast.show && (
         <Toast message={toast.message} show={toast.show} type={toast.type} />

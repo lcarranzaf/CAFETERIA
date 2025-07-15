@@ -91,7 +91,7 @@ const PerfilPage = () => {
                         <label className="text-sm font-medium text-gray-500">Nombre de Usuario</label>
                         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                           <FiUser className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-800 font-medium">@{user.username}</span>
+                          <span className="text-gray-800 font-medium">{user.username}</span>
                         </div>
                       </div>
 
