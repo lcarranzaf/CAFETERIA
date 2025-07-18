@@ -29,6 +29,11 @@ const useNotificaciones = () => {
 
   useEffect(() => {
     cargarNotificaciones()
+    const intervalo = setInterval(() => {
+      cargarNotificaciones()
+    }, 10000) 
+
+    return () => clearInterval(intervalo) 
   }, [])
 
   return {

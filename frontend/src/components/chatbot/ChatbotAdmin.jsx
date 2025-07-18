@@ -258,7 +258,7 @@ const ChatbotAdmin = () => {
               <form onSubmit={handleEnviar} className="flex space-x-2">
                 <input
                   type="text"
-                  className="flex-1 px-3 py-2 text-sm bg-gray-00 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="flex-1 px-3 py-2 text-sm bg-gray-200 border border-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="Pregunta sobre cocina..."
                   value={pregunta}
                   onChange={(e) => setPregunta(e.target.value)}

@@ -69,7 +69,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
             Notificacion.objects.create(
                 usuario=user,
-                mensaje=f"Pedido #{order.id} - confirmado y pago verificado ✅ [VER_PEDIDO:{order.id}]"
+                mensaje=f"Pedido #{order.id} - confirmado y pago verificado ✅ "
             )
 
         return response

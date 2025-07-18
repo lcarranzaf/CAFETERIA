@@ -167,7 +167,7 @@ const ResumenVentas = () => {
                     {datos.mas_vendidos?.length || 0} productos
                   </div>
                 </div>
-                <div className="h-[28rem]"> {/* Aumentamos tamaño del gráfico */}
+                <div className="h-[28rem]"> 
                   <Bar data={chartData} options={chartOptions} />
                 </div>
               </div>
